@@ -5,23 +5,28 @@
   </view>
 
   <view class="chat-area">
-    <view class="message" wx:if="{{chatHistory.length === 0}}">
-      <text>👋 你好！我是你的 AI 英语陪练助手～
-
-你可以和我练习：
-• 日常对话
-• 面试英语
-• 旅游英语
-• 商务英语
-
-在下方输入你想练习的话题吧！</text>
+    <!-- 欢迎消息 -->
+    <view class="message welcome" wx:if="{{chatHistory.length === 0}}">
+      <text>{{welcomeMessage}}</text>
     </view>
-    <view class="message" wx:for="{{chatHistory}}" wx:key="id">
-      <text>{{item.content}}</text>
+    
+    <!-- 聊天记录 -->
+    <view class="message {{item.type}}" wx:for="{{chatHistory}}" wx:key="id">
+      <view class="message-avatar">{{item.type === 'user' ? '👤' : '🤖'}}</view>
+      <view class="message-content">{{item.content}}</view>
+    </view>
+    
+    <!-- 加载中 -->
+    <view class="message ai loading" wx:if="{{loading}}">
+      <view class="message-avatar">🤖</view>
+      <view class="message-content">
+        <text class="loading-dots">思考中</text>
+      </view>
     </view>
   </view>
 
   <view class="input-area">
+    <button class="clear-btn" bindtap="onClear" wx:if="{{chatHistory.length > 0}}">清空</button>
     <input 
       class="input" 
       placeholder="输入你想练习的话题..." 
@@ -30,6 +35,8 @@
       confirm-type="send"
       bindconfirm="onSubmit"
     />
-    <button class="submit-btn" bindtap="onSubmit">发送</button>
+    <button class="submit-btn {{loading ? 'disabled' : ''}}" bindtap="onSubmit" disabled="{{loading}}">
+      {{loading ? '发送中...' : '发送'}}
+    </button>
   </view>
 </view>

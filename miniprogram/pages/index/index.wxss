@@ -8,7 +8,8 @@
 
 .header {
   text-align: center;
-  padding: 40rpx 0;
+  padding: 30rpx 0;
+  flex-shrink: 0;
 }
 
 .title {
@@ -31,21 +32,81 @@
   border-radius: 10rpx;
   padding: 20rpx;
   margin: 20rpx 0;
+  overflow-y: auto;
   min-height: 400rpx;
 }
 
 .message {
-  background: #fff;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
   padding: 20rpx;
   border-radius: 10rpx;
-  margin-bottom: 20rpx;
+  background: #fff;
+}
+
+.message.welcome {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.message.user {
+  flex-direction: row-reverse;
+  background: #e3f2fd;
+}
+
+.message.ai {
+  background: #fff;
+}
+
+.message.loading {
+  background: #f0f0f0;
+}
+
+.message-avatar {
+  font-size: 40rpx;
+  margin: 0 10rpx;
+  flex-shrink: 0;
+}
+
+.message-content {
+  flex: 1;
+  font-size: 28rpx;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.loading-dots::after {
+  content: '...';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
 }
 
 .input-area {
   display: flex;
   align-items: center;
-  gap: 20rpx;
+  gap: 10rpx;
   padding-bottom: 20rpx;
+}
+
+.clear-btn {
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  padding: 20rpx 30rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+  flex-shrink: 0;
 }
 
 .input {
@@ -63,4 +124,9 @@
   padding: 20rpx 40rpx;
   border-radius: 10rpx;
   font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.submit-btn.disabled {
+  background: #ccc;
 }
