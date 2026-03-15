@@ -1,0 +1,115 @@
+<!--pages/shop/shop.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">🏪 角色商店</text>
+    <button class="back-btn" bindtap="goBack">← 返回</button>
+  </view>
+
+  <!-- 付费套餐 -->
+  <view class="packages">
+    <view class="package-card bundle" bindtap="buyBundle">
+      <view class="package-icon">🎁</view>
+      <view class="package-name">完整版</view>
+      <view class="package-desc">全部奥特曼 + 全部怪兽</view>
+      <view class="package-price">
+        <text class="price">¥12</text>
+        <text class="original">原价¥15</text>
+      </view>
+      <view class="package-tag">最划算</view>
+    </view>
+
+    <view class="package-card" bindtap="buyAllUltramen">
+      <view class="package-icon">🦸</view>
+      <view class="package-name">全部奥特曼</view>
+      <view class="package-desc">解锁 8 个奥特曼</view>
+      <view class="package-price">
+        <text class="price">¥6</text>
+      </view>
+    </view>
+
+    <view class="package-card" bindtap="buyAllMonsters">
+      <view class="package-icon">👾</view>
+      <view class="package-name">全部怪兽</view>
+      <view class="package-desc">解锁 6 个怪兽</view>
+      <view class="package-price">
+        <text class="price">¥3</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 奥特曼列表 -->
+  <view class="section">
+    <view class="section-title">🦸 奥特曼角色</view>
+    <view class="character-list">
+      <view 
+        class="character-item {{isUnlocked(u.id) ? 'unlocked' : 'locked'}}"
+        wx:for="{{ultramen}}"
+        wx:key="id"
+        wx:for-item="u">
+        <view class="character-info">
+          <view class="character-image" style="background: {{u.color}}22; border-color: {{u.color}};">
+            <text class="character-emoji">{{u.image}}</text>
+          </view>
+          <view class="character-details">
+            <text class="character-name">{{u.name}}</text>
+            <text class="character-desc">{{u.desc}}</text>
+            <text class="character-skill">技能：{{u.skill}}</text>
+          </view>
+        </view>
+        
+        <view class="character-status">
+          <view class="status-tag free" wx:if="{{u.isFree}}">免费</view>
+          <view class="status-tag unlocked" wx:elif="{{isUnlocked(u.id)}}">已解锁</view>
+          <button class="unlock-btn" wx:else bindtap="buyCharacter" data-id="{{u.id}}" data-name="{{u.name}}" data-type="ultraman">
+            ¥2 解锁
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 怪兽列表 -->
+  <view class="section">
+    <view class="section-title">👾 怪兽角色</view>
+    <view class="character-list">
+      <view 
+        class="character-item {{isUnlocked(m.id) ? 'unlocked' : 'locked'}}"
+        wx:for="{{monsters}}"
+        wx:key="id"
+        wx:for-item="m">
+        <view class="character-info">
+          <view class="character-image" style="background: {{m.color}}22; border-color: {{m.color}};">
+            <text class="character-emoji">{{m.image}}</text>
+          </view>
+          <view class="character-details">
+            <text class="character-name">{{m.name}}</text>
+            <text class="character-desc">{{m.desc}}</text>
+            <text class="character-skill">技能：{{m.skill}}</text>
+          </view>
+        </view>
+        
+        <view class="character-status">
+          <view class="status-tag free" wx:if="{{m.isFree}}">免费</view>
+          <view class="status-tag unlocked" wx:elif="{{isUnlocked(m.id)}}">已解锁</view>
+          <button class="unlock-btn" wx:else bindtap="buyCharacter" data-id="{{m.id}}" data-name="{{m.name}}" data-type="monster">
+            ¥2 解锁
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 恢复购买 -->
+  <view class="restore-section">
+    <button class="restore-btn" bindtap="restorePurchases">🔄 恢复购买</button>
+  </view>
+
+  <!-- 说明 -->
+  <view class="tips">
+    <view class="tips-title">💡 温馨提示</view>
+    <view class="tip-item">✅ 一次购买，永久解锁</view>
+    <view class="tip-item">✅ 支持多设备同步</view>
+    <view class="tip-item">✅ 解锁后可使用全部题库</view>
+    <view class="tip-item">✅ 包含语音读题功能</view>
+  </view>
+</view>
