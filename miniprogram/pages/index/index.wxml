@@ -5,7 +5,18 @@
   </view>
 
   <view class="chat-area">
-    <view class="message" wx:for="{{chatHistory}}" wx:key="index">
+    <view class="message" wx:if="{{chatHistory.length === 0}}">
+      <text>👋 你好！我是你的 AI 英语陪练助手～
+
+你可以和我练习：
+• 日常对话
+• 面试英语
+• 旅游英语
+• 商务英语
+
+在下方输入你想练习的话题吧！</text>
+    </view>
+    <view class="message" wx:for="{{chatHistory}}" wx:key="id">
       <text>{{item.content}}</text>
     </view>
   </view>
@@ -16,6 +27,8 @@
       placeholder="输入你想练习的话题..." 
       value="{{inputValue}}"
       bindinput="onInput"
+      confirm-type="send"
+      bindconfirm="onSubmit"
     />
     <button class="submit-btn" bindtap="onSubmit">发送</button>
   </view>
