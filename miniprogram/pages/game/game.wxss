@@ -176,9 +176,9 @@
 }
 
 .topic-card.selected {
-  border-color: #66ff66 !important;
-  background: linear-gradient(135deg, #2a5a3a 0%, #1a4a2a 100%) !important;
-  box-shadow: 0 0 30rpx rgba(102, 255, 102, 0.8) !important;
+  border: 4rpx solid #66ff66;
+  background: linear-gradient(135deg, #2a5a3a 0%, #1a4a2a 100%);
+  box-shadow: 0 0 35rpx rgba(102, 255, 102, 0.9);
   transform: scale(1.05);
 }
 
@@ -188,7 +188,17 @@
 }
 
 .topic-card.selected .topic-icon {
-  border-color: #66ff66;
+  border: 3rpx solid #66ff66;
+  background: #66ff6622 !important;
+}
+
+.topic-card.selected .topic-check {
+  display: block;
+  animation: checkPop 0.4s ease-out;
+}
+
+.topic-check {
+  display: none;
 }
 
 .topic-icon {

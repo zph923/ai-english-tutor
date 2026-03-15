@@ -71,7 +71,7 @@
         wx:for-item="t"
         bindtap="toggleTopic"
         data-id="{{t.id}}">
-        <view class="topic-icon" style="background: {{t.color}}22;">{{t.icon}}</view>
+        <view class="topic-icon" style="background: {{selectedTopics.indexOf(t.id) > -1 ? t.color + '66' : t.color + '22'}}; border-color: {{selectedTopics.indexOf(t.id) > -1 ? t.color : '#445'}};">{{t.icon}}</view>
         <text class="topic-name">{{t.name}}</text>
         <text class="topic-count">{{t.count}}题</text>
         <view class="topic-check" wx:if="{{selectedTopics.indexOf(t.id) > -1}}">✓</view>
