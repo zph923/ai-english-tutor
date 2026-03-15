@@ -7,7 +7,8 @@ Page({
     isRecording: false,
     isPlaying: false,
     currentPlayingId: null,
-    apiBaseUrl: 'http://localhost:3000' // 后端 API 地址
+    // 开发环境用 localhost，生产环境需要换成 HTTPS 域名
+    apiBaseUrl: 'http://127.0.0.1:3000'
   },
 
   onLoad() {
@@ -107,7 +108,6 @@ Page({
     return replies[Math.floor(Math.random() * replies.length)]
   },
 
-  // 🎤 开始录音
   onStartRecord() {
     if (this.data.isRecording) {
       this.stopRecord()
@@ -157,8 +157,6 @@ Page({
     recorderManager.onStop((res) => {
       console.log('录音结束', res)
       this.setData({ isRecording: false })
-      
-      // 识别语音
       this.recognizeSpeech(res.tempFilePath)
     })
 
@@ -171,7 +169,6 @@ Page({
       })
     })
 
-    // 配置录音参数
     recorderManager.start({
       duration: 60000,
       sampleRate: 16000,
@@ -186,21 +183,16 @@ Page({
     recorderManager.stop()
   },
 
-  // 🎙️ 语音识别
   async recognizeSpeech(filePath) {
     wx.showLoading({ title: '识别中...' })
     
     const { apiBaseUrl } = this.data
     
     try {
-      // 读取录音文件
       const fs = wx.getFileSystemManager()
       const arrayBuffer = fs.readFileSync(filePath)
-      
-      // 转 Base64
       const base64 = wx.arrayBufferToBase64(arrayBuffer)
       
-      // 调用后端识别 API
       const res = await wx.request({
         url: `${apiBaseUrl}/api/speech/recognize`,
         method: 'POST',
@@ -214,9 +206,7 @@ Page({
       
       if (res.data.success) {
         const recognizedText = res.data.data.text
-        
         this.setData({ inputValue: recognizedText })
-        
         wx.showToast({
           title: `识别成功：${recognizedText}`,
           icon: 'success',
@@ -228,31 +218,17 @@ Page({
     } catch (error) {
       wx.hideLoading()
       console.error('语音识别错误:', error)
-      
-      // 降级处理：用小程序内置识别
-      this.recognizeSpeechFallback(filePath)
+      wx.showToast({
+        title: '语音识别失败',
+        icon: 'none'
+      })
     }
   },
 
-  // 降级：使用小程序内置语音识别
-  recognizeSpeechFallback(filePath) {
-    wx.startRecord({
-      success: (res) => {
-        // 注意：wx.startRecord 已废弃，仅作为备选
-        wx.showToast({
-          title: '请使用输入框输入',
-          icon: 'none'
-        })
-      }
-    })
-  },
-
-  // 🔊 语音播放
   async speak(e) {
     const { text, id } = e.currentTarget.dataset
     
     if (this.data.isPlaying && this.data.currentPlayingId === id) {
-      // 正在播放这条，停止
       wx.stopVoice()
       this.setData({ isPlaying: false, currentPlayingId: null })
       return
@@ -270,13 +246,12 @@ Page({
       
       wx.showLoading({ title: '生成语音...' })
       
-      // 调用后端 TTS API
       const res = await wx.request({
         url: `${apiBaseUrl}/api/speech/synthesize`,
         method: 'POST',
         data: {
           text: text,
-          voice: 'xiaoyan' // 小燕（女声）
+          voice: 'xiaoyan'
         },
         timeout: 30000
       })
@@ -284,40 +259,57 @@ Page({
       wx.hideLoading()
       
       if (res.data.success) {
-        // 播放音频
         const audioBase64 = res.data.data.audioBase64
         
-        // 保存到临时文件
+        if (!audioBase64) {
+          throw new Error('未收到音频数据')
+        }
+        
         const fs = wx.getFileSystemManager()
         const tempPath = `${wx.env.USER_DATA_PATH}/tts_${id}.mp3`
         
-        fs.writeFileSync(tempPath, wx.base64ToArrayBuffer(audioBase64))
+        try {
+          fs.writeFileSync(tempPath, wx.base64ToArrayBuffer(audioBase64))
+        } catch (writeError) {
+          console.error('写入音频文件失败:', writeError)
+          throw new Error('音频文件写入失败')
+        }
         
-        // 播放
         const innerAudioContext = wx.createInnerAudioContext()
         innerAudioContext.src = tempPath
+        innerAudioContext.autoplay = false
         
         innerAudioContext.onPlay(() => {
-          console.log('开始播放')
+          console.log('开始播放音频')
         })
         
         innerAudioContext.onEnded(() => {
+          console.log('音频播放结束')
           this.setData({ 
             isPlaying: false, 
             currentPlayingId: null 
           })
-          console.log('播放结束')
         })
         
         innerAudioContext.onError((err) => {
-          console.error('播放错误', err)
+          console.error('音频播放错误:', err)
           this.setData({ 
             isPlaying: false, 
             currentPlayingId: null 
+          })
+          wx.showToast({
+            title: '播放失败',
+            icon: 'none'
           })
         })
         
         innerAudioContext.play()
+        
+        wx.showToast({
+          title: '正在播放',
+          icon: 'none',
+          duration: 1000
+        })
       } else {
         throw new Error(res.data.message || '语音合成失败')
       }
@@ -331,8 +323,9 @@ Page({
       })
       
       wx.showToast({
-        title: '语音播放失败',
-        icon: 'none'
+        title: error.message || '语音播放失败',
+        icon: 'none',
+        duration: 2000
       })
     }
   },

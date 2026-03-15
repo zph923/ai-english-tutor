@@ -1,0 +1,115 @@
+/* pages/records/records.wxss */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a2a4a 0%, #0f1a3a 100%);
+  padding: 30rpx;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 20rpx #ffd700;
+}
+
+.back-btn {
+  background: transparent;
+  color: #00d4ff;
+  border: 2rpx solid #00d4ff;
+  padding: 15rpx 30rpx;
+  font-size: 28rpx;
+  border-radius: 50rpx;
+}
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.record-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  padding: 25rpx;
+  border: 2rpx solid #334;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.record-date {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.record-result {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.record-result.win {
+  color: #66ff66;
+}
+
+.record-result.lose {
+  color: #ff6666;
+}
+
+.record-stats {
+  display: flex;
+  gap: 30rpx;
+}
+
+.stat {
+  font-size: 26rpx;
+  color: #fff;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 100rpx 0;
+}
+
+.empty-emoji {
+  font-size: 100rpx;
+  display: block;
+  margin-bottom: 30rpx;
+}
+
+.empty-text {
+  display: block;
+  font-size: 32rpx;
+  color: #888;
+  margin-bottom: 15rpx;
+}
+
+.empty-hint {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.footer {
+  margin-top: 40rpx;
+  text-align: center;
+}
+
+.clear-btn {
+  background: linear-gradient(135deg, #ff4444 0%, #cc3333 100%);
+  color: #fff;
+  border: none;
+  padding: 20rpx 50rpx;
+  font-size: 28rpx;
+  border-radius: 100rpx;
+}

@@ -1,0 +1,33 @@
+<!--pages/records/records.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">📊 游戏记录</text>
+    <button class="back-btn" bindtap="goBack">← 返回</button>
+  </view>
+
+  <view class="records-list" wx:if="{{records.length > 0}}">
+    <view class="record-item" wx:for="{{records}}" wx:key="index">
+      <view class="record-header">
+        <text class="record-date">{{item.date}}</text>
+        <text class="record-result {{item.win ? 'win' : 'lose'}}">
+          {{item.win ? '🏆 胜利' : '😢 失败'}}
+        </text>
+      </view>
+      <view class="record-stats">
+        <text class="stat">✅ {{item.correctCount}} 对</text>
+        <text class="stat">❌ {{item.wrongCount}} 错</text>
+        <text class="stat">📊 {{item.accuracy}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-emoji">📝</text>
+    <text class="empty-text">还没有游戏记录</text>
+    <text class="empty-hint">快去玩一局吧！</text>
+  </view>
+
+  <view class="footer" wx:if="{{records.length > 0}}">
+    <button class="clear-btn" bindtap="clearRecords">🗑️ 清空记录</button>
+  </view>
+</view>

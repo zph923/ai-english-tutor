@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>条宝奥特曼打怪兽</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      background: linear-gradient(180deg, #1a2a4a 0%, #0f1a3a 100%);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 900px;
+      width: 100%;
+      box-shadow: 0 0 40px rgba(0, 150, 255, 0.4);
+      border: 3px solid #00a0ff;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffd700;
+      font-size: 2.2em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px #ffd700;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      font-size: 1em;
+      margin-bottom: 25px;
+    }
+
+    h2 {
+      color: #00d4ff;
+      text-align: center;
+      margin: 25px 0 15px;
+      font-size: 1.4em;
+      text-shadow: 0 0 10px #00d4ff;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .character-select {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .character-card {
+      background: linear-gradient(135deg, #1a2a3a 0%, #2a3a5a 100%);
+      border: 3px solid #445;
+      border-radius: 15px;
+      padding: 15px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .character-card:hover {
+      transform: scale(1.05);
+      border-color: #00d4ff;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+
+    .character-card.selected {
+      border-color: #ffd700;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+      transform: scale(1.05);
+    }
+
+    .character-card.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 1.5em;
+      color: #ffd700;
+    }
+
+    .character-image {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 10px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .character-name {
+      color: #fff;
+      font-size: 0.95em;
+      font-weight: bold;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+      color: #fff;
+      border: none;
+      padding: 15px 50px;
+      font-size: 1.3em;
+      border-radius: 50px;
+      cursor: pointer;
+      display: block;
+      margin: 30px auto 0;
+      transition: all 0.3s;
+      box-shadow: 0 5px 25px rgba(0, 212, 255, 0.5);
+      font-weight: bold;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 35px rgba(0, 212, 255, 0.8);
+    }
+
+    .btn:disabled {
+      background: #445;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 战斗场景 */
+    .battle-scene {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      border: 2px solid #334;
+    }
+
+    .fighter {
+      text-align: center;
+      flex: 1;
+    }
+
+    .fighter-image {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 10px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4em;
+      background: rgba(0,0,0,0.3);
+      border: 3px solid #556;
+    }
+
+    .health-bar {
+      width: 180px;
+      height: 30px;
+      background: #222;
+      border-radius: 15px;
+      margin: 10px auto;
+      overflow: hidden;
+      border: 3px solid #444;
+      position: relative;
+    }
+
+    .health-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff3333 0%, #ff6666 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1em;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    .health-fill.good {
+      background: linear-gradient(90deg, #33ff33 0%, #66ff66 100%);
+    }
+
+    .health-fill.warning {
+      background: linear-gradient(90deg, #ffaa00 0%, #ffcc00 100%);
+    }
+
+    .fighter-name {
+      color: #fff;
+      font-size: 1.2em;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .vs-symbol {
+      font-size: 3em;
+      color: #ff4444;
+      font-weight: bold;
+      margin: 0 30px;
+      text-shadow: 0 0 20px #ff4444;
+    }
+
+    /* 题目区域 */
+    .question-area {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 30px;
+      margin: 20px 0;
+      border: 2px solid #334;
+    }
+
+    .question-text {
+      color: #fff;
+      font-size: 1.6em;
+      text-align: center;
+      margin-bottom: 25px;
+      line-height: 1.6;
+      font-weight: bold;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .option-btn {
+      background: linear-gradient(135deg, #3a4a6a 0%, #2a3a5a 100%);
+      color: #fff;
+      border: 3px solid #556;
+      padding: 25px 20px;
+      font-size: 1.2em;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #4a5a7a 0%, #3a4a6a 100%);
+      border-color: #00d4ff;
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+    }
+
+    .option-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .option-btn.correct {
+      background: linear-gradient(135deg, #33ff33 0%, #66ff66 100%);
+      border-color: #33ff33;
+      color: #000;
+    }
+
+    .option-btn.wrong {
+      background: linear-gradient(135deg, #ff3333 0%, #ff6666 100%);
+      border-color: #ff3333;
+    }
+
+    .progress {
+      text-align: center;
+      color: #00d4ff;
+      font-size: 1.2em;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+
+    /* 结果页面 */
+    .result-screen {
+      text-align: center;
+    }
+
+    .result-emoji {
+      font-size: 6em;
+      display: block;
+      margin: 20px 0;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .result-title {
+      color: #ffd700;
+      font-size: 2.2em;
+      margin: 20px 0;
+      text-shadow: 0 0 20px #ffd700;
+    }
+
+    .result-title.lose {
+      color: #ff4444;
+      text-shadow: 0 0 20px #ff4444;
+    }
+
+    .summary {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      text-align: left;
+      border: 2px solid #334;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .summary-title {
+      color: #00d4ff;
+      font-size: 1.4em;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .summary-item {
+      color: #fff;
+      padding: 15px;
+      margin: 10px 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      border-left: 5px solid #ff4444;
+    }
+
+    .summary-item.correct {
+      border-left-color: #33ff33;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 15px;
+      color: #fff;
+      border: 2px solid #334;
+    }
+
+    .stat-number {
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #00d4ff;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.8;
+      margin-top: 8px;
+    }
+
+    /* 攻击动画 */
+    .attack-effect {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10em;
+      z-index: 1000;
+      animation: attackAnim 0.8s ease-out;
+      pointer-events: none;
+    }
+
+    @keyframes attackAnim {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3) rotate(180deg); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2) rotate(360deg); }
+    }
+
+    .damage-text {
+      position: fixed;
+      font-size: 3em;
+      color: #ff3333;
+      font-weight: bold;
+      text-shadow: 0 0 10px #ff3333;
+      animation: damageAnim 1s ease-out;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    @keyframes damageAnim {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-100px); }
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      .character-select {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .battle-scene {
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .vs-symbol {
+        margin: 10px 0;
+      }
+
+      h1 {
+        font-size: 1.6em;
+      }
+
+      .question-text {
+        font-size: 1.3em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🌟 条宝奥特曼打怪兽 🌟</h1>
+    <p class="subtitle">答题赢胜利！适合 3-4 岁宝宝的教育游戏</p>
+
+    <!-- 角色选择界面 -->
+    <div id="selectScreen" class="screen active">
+      <h2>🦸 选择你的奥特曼</h2>
+      <div class="character-select" id="ultramanSelect"></div>
+
+      <h2>👾 选择怪兽</h2>
+      <div class="character-select" id="monsterSelect"></div>
+
+      <button class="btn" id="startBtn" disabled>⚔️ 开始战斗！</button>
+    </div>
+
+    <!-- 战斗界面 -->
+    <div id="battleScreen" class="screen">
+      <div class="battle-scene">
+        <div class="fighter">
+          <div class="fighter-image" id="ultramanImage"></div>
+          <div class="health-bar">
+            <div class="health-fill" id="ultramanHealth" style="width: 100%;">10/10</div>
+          </div>
+          <div class="fighter-name" id="ultramanName"></div>
+        </div>
+
+        <div class="vs-symbol">VS</div>
+
+        <div class="fighter">
+          <div class="fighter-image" id="monsterImage"></div>
+          <div class="health-bar">
+            <div class="health-fill" id="monsterHealth" style="width: 100%;">10/10</div>
+          </div>
+          <div class="fighter-name" id="monsterName"></div>
+        </div>
+      </div>
+
+      <div class="progress">第 <span id="questionNum">1</span> / 10 题</div>
+
+      <div class="question-area">
+        <div class="question-text" id="questionText"></div>
+        <div class="options" id="optionsContainer"></div>
+      </div>
+    </div>
+
+    <!-- 结果界面 -->
+    <div id="resultScreen" class="screen result-screen">
+      <span class="result-emoji" id="resultEmoji"></span>
+      <h2 class="result-title" id="resultTitle"></h2>
+
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-number" id="correctCount">0</div>
+          <div class="stat-label">答对题数</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="wrongCount">0</div>
+          <div class="stat-label">答错题数</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="accuracy">0%</div>
+          <div class="stat-label">正确率</div>
+        </div>
+      </div>
+
+      <div class="summary" id="summaryContainer">
+        <div class="summary-title">📝 错题总结</div>
+        <div id="wrongQuestions"></div>
+      </div>
+
+      <button class="btn" onclick="restartGame()">🔄 再玩一次</button>
+    </div>
+  </div>
+
+  <script>
+    // 游戏数据 - 奥特曼角色（更符合原著的形象描述）
+    const ultramen = [
+      { 
+        id: 1, 
+        name: '迪迦奥特曼', 
+        color: '#ff6600',
+        image: '🦸‍️',
+        desc: '光之巨人，红色形态'
+      },
+      { 
+        id: 2, 
+        name: '赛罗奥特曼', 
+        color: '#00aaff',
+        image: '🦸',
+        desc: '最强战士，蓝色头盔'
+      },
+      { 
+        id: 3, 
+        name: '泰迦奥特曼', 
+        color: '#ff3366',
+        image: '⚡',
+        desc: '泰罗之子，新生代英雄'
+      },
+      { 
+        id: 4, 
+        name: '泽塔奥特曼', 
+        color: '#cc00ff',
+        image: '🌟',
+        desc: '赛罗徒弟，宇宙拳法'
+      }
+    ];
+
+    // 怪兽角色
+    const monsters = [
+      { 
+        id: 1, 
+        name: '哥莫拉', 
+        color: '#886644',
+        image: '🦖',
+        desc: '古代怪兽，超振动波'
+      },
+      { 
+        id: 2, 
+        name: '巴尔坦星人', 
+        color: '#88cc88',
+        image: '👽',
+        desc: '宇宙忍者，分身术'
+      },
+      { 
+        id: 3, 
+        name: '杰顿', 
+        color: '#ffaa00',
+        image: '👾',
+        desc: '最强怪兽，一兆度火球'
+      },
+      { 
+        id: 4, 
+        name: '贝利亚', 
+        color: '#aa0000',
+        image: '😈',
+        desc: '黑暗奥特曼，终极战斗仪'
+      }
+    ];
+
+    // 题库（适合 3-4 岁）
+    const questionBank = [
+      // 数学题
+      { type: 'math', question: '1 + 1 = ?', options: ['1', '2', '3', '4'], answer: 1 },
+      { type: 'math', question: '2 + 1 = ?', options: ['2', '3', '4', '5'], answer: 1 },
+      { type: 'math', question: '3 - 1 = ?', options: ['1', '2', '3', '4'], answer: 1 },
+      { type: 'math', question: '5 - 2 = ?', options: ['2', '3', '4', '5'], answer: 1 },
+      { type: 'math', question: '2 + 2 = ?', options: ['3', '4', '5', '6'], answer: 1 },
+      { type: 'math', question: '哪个数字最大？', options: ['3', '1', '5', '2'], answer: 2 },
+      { type: 'math', question: '哪个数字最小？', options: ['4', '2', '1', '3'], answer: 2 },
+      { type: 'math', question: '1 + 2 = ?', options: ['2', '3', '4', '5'], answer: 1 },
+      { type: 'math', question: '4 - 1 = ?', options: ['2', '3', '4', '5'], answer: 1 },
+      { type: 'math', question: '3 + 2 = ?', options: ['4', '5', '6', '7'], answer: 1 },
+      { type: 'math', question: '数一数：🍎🍎 有几个苹果？', options: ['2 个', '3 个', '4 个', '5 个'], answer: 1 },
+
+      // 认知题
+      { type: 'knowledge', question: '🍎 是什么？', options: ['香蕉', '苹果', '橘子', '西瓜'], answer: 1 },
+      { type: 'knowledge', question: '🐶 是什么动物？', options: ['猫', '狗', '兔', '鸟'], answer: 1 },
+      { type: 'knowledge', question: '🌞 是什么？', options: ['月亮', '星星', '太阳', '云'], answer: 2 },
+      { type: 'knowledge', question: '🐱 是什么动物？', options: ['狗', '猫', '鼠', '鱼'], answer: 1 },
+      { type: 'knowledge', question: '🍌 是什么？', options: ['苹果', '香蕉', '葡萄', '梨'], answer: 1 },
+      { type: 'knowledge', question: '🐘 的鼻子是？', options: ['短的', '长的', '没有', '小的'], answer: 1 },
+      { type: 'knowledge', question: '🐦 会？', options: ['游泳', '飞翔', '爬树', '打洞'], answer: 1 },
+      { type: 'knowledge', question: '🌙 出现在什么时候？', options: ['早上', '中午', '晚上', '下午'], answer: 2 },
+      { type: 'knowledge', question: '🐟 生活在哪里？', options: ['天上', '地上', '水里', '树上'], answer: 2 },
+      { type: 'knowledge', question: '🚗 有几个轮子？', options: ['2 个', '3 个', '4 个', '5 个'], answer: 2 },
+
+      // 英语题
+      { type: 'english', question: '🍎 用英语怎么说？', options: ['banana', 'apple', 'orange', 'grape'], answer: 1 },
+      { type: 'english', question: '🐶 用英语怎么说？', options: ['cat', 'dog', 'bird', 'fish'], answer: 1 },
+      { type: 'english', question: '🐱 用英语怎么说？', options: ['dog', 'cat', 'mouse', 'duck'], answer: 1 },
+      { type: 'english', question: '🌞 用英语怎么说？', options: ['moon', 'sun', 'star', 'sky'], answer: 1 },
+      { type: 'english', question: '🍌 用英语怎么说？', options: ['apple', 'banana', 'orange', 'pear'], answer: 1 },
+      { type: 'english', question: '🐘 用英语怎么说？', options: ['tiger', 'lion', 'elephant', 'monkey'], answer: 2 },
+      { type: 'english', question: '🐦 用英语怎么说？', options: ['fish', 'bird', 'duck', 'chicken'], answer: 1 },
+      { type: 'english', question: '🌙 用英语怎么说？', options: ['sun', 'moon', 'star', 'cloud'], answer: 1 },
+      { type: 'english', question: '🐟 用英语怎么说？', options: ['bird', 'fish', 'dog', 'cat'], answer: 1 },
+      { type: 'english', question: '🚗 用英语怎么说？', options: ['bus', 'car', 'bike', 'train'], answer: 1 },
+      { type: 'english', question: 'Hello 是什么意思？', options: ['再见', '你好', '谢谢', '对不起'], answer: 1 },
+
+      // 颜色题
+      { type: 'color', question: '🍓 是什么颜色？', options: ['绿色', '红色', '黄色', '蓝色'], answer: 1 },
+      { type: 'color', question: '🍌 是什么颜色？', options: ['红色', '黄色', '紫色', '蓝色'], answer: 1 },
+      { type: 'color', question: '🌿 是什么颜色？', options: ['红色', '绿色', '黄色', '白色'], answer: 1 },
+      { type: 'color', question: '🌊 是什么颜色？', options: ['红色', '蓝色', '黄色', '黑色'], answer: 1 },
+      { type: 'color', question: '☁️ 是什么颜色？', options: ['黑色', '白色', '红色', '蓝色'], answer: 1 }
+    ];
+
+    // 游戏状态
+    let selectedUltraman = null;
+    let selectedMonster = null;
+    let ultramanHealth = 10;
+    let monsterHealth = 10;
+    let currentQuestionIndex = 0;
+    let questions = [];
+    let wrongQuestions = [];
+    let correctCount = 0;
+
+    // 初始化角色选择
+    function initCharacterSelect() {
+      const ultramanContainer = document.getElementById('ultramanSelect');
+      const monsterContainer = document.getElementById('monsterSelect');
+
+      // 创建奥特曼卡片
+      ultramen.forEach(function(u, index) {
+        const card = document.createElement('div');
+        card.className = 'character-card';
+        card.setAttribute('data-index', index);
+        card.setAttribute('data-type', 'ultraman');
+        card.innerHTML = 
+          '<div class="character-image" style="background: ' + u.color + '22; border-color: ' + u.color + ';">' + u.image + '</div>' +
+          '<div class="character-name">' + u.name + '</div>';
+        card.onclick = function() { selectUltraman(index); };
+        ultramanContainer.appendChild(card);
+      });
+
+      // 创建怪兽卡片
+      monsters.forEach(function(m, index) {
+        const card = document.createElement('div');
+        card.className = 'character-card';
+        card.setAttribute('data-index', index);
+        card.setAttribute('data-type', 'monster');
+        card.innerHTML = 
+          '<div class="character-image" style="background: ' + m.color + '22; border-color: ' + m.color + ';">' + m.image + '</div>' +
+          '<div class="character-name">' + m.name + '</div>';
+        card.onclick = function() { selectMonster(index); };
+        monsterContainer.appendChild(card);
+      });
+    }
+
+    function selectUltraman(index) {
+      selectedUltraman = ultramen[index];
+      var cards = document.querySelectorAll('#ultramanSelect .character-card');
+      cards.forEach(function(card, i) {
+        if (i === index) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      checkStartButton();
+    }
+
+    function selectMonster(index) {
+      selectedMonster = monsters[index];
+      var cards = document.querySelectorAll('#monsterSelect .character-card');
+      cards.forEach(function(card, i) {
+        if (i === index) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      checkStartButton();
+    }
+
+    function checkStartButton() {
+      var btn = document.getElementById('startBtn');
+      btn.disabled = !(selectedUltraman && selectedMonster);
+    }
+
+    // 绑定开始按钮事件
+    document.getElementById('startBtn').onclick = function() {
+      if (selectedUltraman && selectedMonster) {
+        startGame();
+      }
+    };
+
+    function shuffleArray(array) {
+      var newArray = array.slice();
+      for (var i = newArray.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = newArray[i];
+        newArray[i] = newArray[j];
+        newArray[j] = temp;
+      }
+      return newArray;
+    }
+
+    function startGame() {
+      ultramanHealth = 10;
+      monsterHealth = 10;
+      currentQuestionIndex = 0;
+      wrongQuestions = [];
+      correctCount = 0;
+
+      questions = shuffleArray(questionBank.slice()).slice(0, 10);
+
+      document.getElementById('ultramanImage').innerHTML = selectedUltraman.image;
+      document.getElementById('ultramanImage').style.borderColor = selectedUltraman.color;
+      document.getElementById('ultramanName').textContent = selectedUltraman.name;
+      
+      document.getElementById('monsterImage').innerHTML = selectedMonster.image;
+      document.getElementById('monsterImage').style.borderColor = selectedMonster.color;
+      document.getElementById('monsterName').textContent = selectedMonster.name;
+
+      updateHealth();
+      switchScreen('battleScreen');
+      showQuestion();
+    }
+
+    function switchScreen(screenId) {
+      var screens = document.querySelectorAll('.screen');
+      screens.forEach(function(s) {
+        s.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function updateHealth() {
+      var uHealth = document.getElementById('ultramanHealth');
+      var mHealth = document.getElementById('monsterHealth');
+
+      uHealth.style.width = (ultramanHealth * 10) + '%';
+      uHealth.textContent = ultramanHealth + '/10';
+      uHealth.className = 'health-fill ' + (ultramanHealth > 5 ? 'good' : (ultramanHealth > 3 ? 'warning' : ''));
+
+      mHealth.style.width = (monsterHealth * 10) + '%';
+      mHealth.textContent = monsterHealth + '/10';
+      mHealth.className = 'health-fill ' + (monsterHealth > 5 ? 'good' : (monsterHealth > 3 ? 'warning' : ''));
+    }
+
+    function showQuestion() {
+      if (currentQuestionIndex >= questions.length || ultramanHealth <= 0 || monsterHealth <= 0) {
+        endGame();
+        return;
+      }
+
+      var q = questions[currentQuestionIndex];
+      document.getElementById('questionNum').textContent = currentQuestionIndex + 1;
+      document.getElementById('questionText').textContent = q.question;
+
+      var optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach(function(opt, index) {
+        var btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.onclick = function() { selectAnswer(index); };
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(selectedIndex) {
+      var q = questions[currentQuestionIndex];
+      var buttons = document.querySelectorAll('.option-btn');
+
+      buttons.forEach(function(btn) {
+        btn.disabled = true;
+      });
+
+      var isCorrect = selectedIndex === q.answer;
+
+      if (isCorrect) {
+        buttons[selectedIndex].classList.add('correct');
+        monsterHealth--;
+        correctCount++;
+        showAttackEffect('💥', 'monster');
+        showDamageText('-1 ❤️', 'monster');
+      } else {
+        buttons[selectedIndex].classList.add('wrong');
+        buttons[q.answer].classList.add('correct');
+        ultramanHealth--;
+        wrongQuestions.push({
+          question: q.question,
+          yourAnswer: q.options[selectedIndex],
+          correctAnswer: q.options[q.answer]
+        });
+        showAttackEffect('⚡', 'ultraman');
+        showDamageText('-1 ❤️', 'ultraman');
+      }
+
+      updateHealth();
+
+      setTimeout(function() {
+        currentQuestionIndex++;
+        showQuestion();
+      }, 1500);
+    }
+
+    function showAttackEffect(emoji, target) {
+      var effect = document.createElement('div');
+      effect.className = 'attack-effect';
+      effect.textContent = emoji;
+      document.body.appendChild(effect);
+
+      setTimeout(function() {
+        effect.remove();
+      }, 800);
+    }
+
+    function showDamageText(text, target) {
+      var damage = document.createElement('div');
+      damage.className = 'damage-text';
+      damage.textContent = text;
+      
+      if (target === 'monster') {
+        damage.style.right = '20%';
+      } else {
+        damage.style.left = '20%';
+      }
+      damage.style.top = '40%';
+      
+      document.body.appendChild(damage);
+
+      setTimeout(function() {
+        damage.remove();
+      }, 1000);
+    }
+
+    function endGame() {
+      switchScreen('resultScreen');
+
+      var won = monsterHealth <= 0 && ultramanHealth > 0;
+      var resultEmoji = document.getElementById('resultEmoji');
+      var resultTitle = document.getElementById('resultTitle');
+
+      if (won) {
+        resultEmoji.textContent = '🏆';
+        resultTitle.textContent = '🎉 奥特曼胜利！🎉';
+        resultTitle.classList.remove('lose');
+      } else {
+        resultEmoji.textContent = '💀';
+        resultTitle.textContent = '😢 怪兽胜利！😢';
+        resultTitle.classList.add('lose');
+      }
+
+      var totalQuestions = currentQuestionIndex;
+      var wrongCount = totalQuestions - correctCount;
+      var accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+      document.getElementById('correctCount').textContent = correctCount;
+      document.getElementById('wrongCount').textContent = wrongCount;
+      document.getElementById('accuracy').textContent = accuracy + '%';
+
+      var wrongContainer = document.getElementById('wrongQuestions');
+      wrongContainer.innerHTML = '';
+      
+      if (wrongQuestions.length === 0) {
+        wrongContainer.innerHTML = '<div class="summary-item correct">🎉 太棒了！全部答对！</div>';
+      } else {
+        wrongQuestions.forEach(function(q, index) {
+          var item = document.createElement('div');
+          item.className = 'summary-item';
+          item.innerHTML = '<strong>第' + (index + 1) + '题：</strong>' + q.question + '<br>' +
+                          '<span style="color: #ff6666;">❌ 你的答案：' + q.yourAnswer + '</span><br>' +
+                          '<span style="color: #66ff66;">✅ 正确答案：' + q.correctAnswer + '</span>';
+          wrongContainer.appendChild(item);
+        });
+      }
+    }
+
+    function restartGame() {
+      selectedUltraman = null;
+      selectedMonster = null;
+      var cards = document.querySelectorAll('.character-card');
+      cards.forEach(function(card) {
+        card.classList.remove('selected');
+      });
+      document.getElementById('startBtn').disabled = true;
+      switchScreen('selectScreen');
+    }
+
+    // 页面加载完成后初始化
+    window.onload = function() {
+      initCharacterSelect();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!--
+此文件为开发者工具生成，生成时间: 2026/3/15下午7:18:45
+使用方法：
+在 C:\Users\Administrator\.openclaw\workspace\ai-english-tutor\miniprogram\pages\index\index.wxml 引入模板
+
+```
+<import src="index.skeleton.wxml"/>
+<template is="skeleton" wx:if="{{loading}}" />
+```
+
+在 C:\Users\Administrator\.openclaw\workspace\ai-english-tutor\miniprogram\pages\index\index.wxss 中引入样式
+```
+@import "./index.skeleton.wxss";
+```
+
+更多详细信息可以参考文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/skeleton.html
+-->
+<template name="skeleton">
+  <view class="sk-container">
+    <view class="container">
+      <view class="header">
+        <text class="title sk-transparent sk-text-14-2857-277 sk-text" style="background-position-x: 50%;">🤖 AI 口语陪练</text>
+        <text class="subtitle sk-transparent sk-text-14-2857-147 sk-text" style="background-position-x: 50%;">随时随地练习英语</text>
+      </view>
+      <view class="chat-area">
+        <view class="message user">
+          <view class="message-avatar sk-transparent sk-text-14-2857-641 sk-text">👤</view>
+          <view class="message-content-wrapper">
+            <view class="message-content sk-transparent sk-text-18-7500-836 sk-text">我想练习日常对话</view>
+          </view>
+        </view>
+        <view class="message ai">
+          <view class="message-avatar sk-transparent sk-text-14-2857-342 sk-text">🤖</view>
+          <view class="message-content-wrapper">
+            <view class="message-content sk-transparent sk-text-18-7500-355 sk-text">Perfect choice! "我想练习日常对话" is a common conversation topic. Give it a try in English!</view>
+            <view class="message-actions">
+              <button class="speak-btn sk-transparent sk-button sk-pseudo sk-pseudo-circle" data-id="1773570487183" data-text="Perfect choice! &quot;我想练习日常对话&quot; is a common conversation topic.
+
+Give it a try in English!">
+                🔊 播放
+              </button>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="input-area">
+        <button class="voice-btn sk-transparent sk-button sk-pseudo sk-pseudo-circle">
+          🎤 语音
+        </button>
+        <view class="input sk-image" placeholder="输入你想练习的话题..." value="true"></view>
+        <button class="submit-btn sk-transparent sk-button sk-pseudo sk-pseudo-circle">
+          发送
+        </button>
+      </view>
+    </view>
+  </view>
+</template>

@@ -1,0 +1,154 @@
+<!--pages/game/game.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">🌟 条宝奥特曼打怪兽 🌟</text>
+    <text class="subtitle">答题赢胜利！适合 3-4 岁宝宝</text>
+  </view>
+
+  <!-- 角色选择界面 -->
+  <view class="screen" wx:if="{{gameState === 'select'}}">
+    <view class="section">
+      <view class="section-title">🦸 选择你的奥特曼</view>
+      <view class="character-grid">
+        <view 
+          class="character-card {{selectedUltraman && selectedUltraman.id === u.id ? 'selected' : ''}}"
+          wx:for="{{ultramen}}"
+          wx:key="id"
+          data-index="{{index}}"
+          bindtap="selectUltraman">
+          <view class="character-image" style="background: {{u.color}}22; border-color: {{u.color}};">
+            <text class="character-emoji">{{u.image}}</text>
+          </view>
+          <text class="character-name">{{u.name}}</text>
+          <text class="character-desc">{{u.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">👾 选择怪兽</view>
+      <view class="character-grid">
+        <view 
+          class="character-card {{selectedMonster && selectedMonster.id === m.id ? 'selected' : ''}}"
+          wx:for="{{monsters}}"
+          wx:key="id"
+          data-index="{{index}}"
+          bindtap="selectMonster">
+          <view class="character-image" style="background: {{m.color}}22; border-color: {{m.color}};">
+            <text class="character-emoji">{{m.image}}</text>
+          </view>
+          <text class="character-name">{{m.name}}</text>
+          <text class="character-desc">{{m.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button class="start-btn" bindtap="startGame" disabled="{{!selectedUltraman || !selectedMonster}}">
+      ⚔️ 开始战斗
+    </button>
+  </view>
+
+  <!-- 战斗界面 -->
+  <view class="screen" wx:if="{{gameState === 'battle'}}">
+    <!-- 战斗场景 -->
+    <view class="battle-scene">
+      <view class="fighter">
+        <view class="fighter-image" style="border-color: {{selectedUltraman.color}};">
+          <text class="fighter-emoji">{{selectedUltraman.image}}</text>
+        </view>
+        <view class="health-bar">
+          <view class="health-fill {{ultramanHealth > 5 ? 'good' : (ultramanHealth > 3 ? 'warning' : 'danger')}}" 
+                style="width: {{ultramanHealth * 10}}%;">
+            <text>{{ultramanHealth}}/10</text>
+          </view>
+        </view>
+        <text class="fighter-name">{{selectedUltraman.name}}</text>
+      </view>
+
+      <view class="vs-symbol">VS</view>
+
+      <view class="fighter">
+        <view class="fighter-image" style="border-color: {{selectedMonster.color}};">
+          <text class="fighter-emoji">{{selectedMonster.image}}</text>
+        </view>
+        <view class="health-bar">
+          <view class="health-fill {{monsterHealth > 5 ? 'good' : (monsterHealth > 3 ? 'warning' : 'danger')}}" 
+                style="width: {{monsterHealth * 10}}%;">
+            <text>{{monsterHealth}}/10</text>
+          </view>
+        </view>
+        <text class="fighter-name">{{selectedMonster.name}}</text>
+      </view>
+    </view>
+
+    <!-- 进度 -->
+    <view class="progress">第 {{currentQuestionIndex + 1}} / 10 题</view>
+
+    <!-- 题目区域 -->
+    <view class="question-area" wx:if="{{currentQuestion}}">
+      <view class="question-type">{{currentQuestion.type}}</view>
+      <view class="question-text">{{currentQuestion.q}}</view>
+      <view class="options">
+        <button 
+          class="option-btn"
+          wx:for="{{currentQuestion.a}}"
+          wx:key="index"
+          data-index="{{index}}"
+          bindtap="selectAnswer">
+          {{item}}
+        </button>
+      </view>
+    </view>
+
+    <!-- 攻击动画 -->
+    <view class="attack-overlay" wx:if="{{showAttack}}">
+      <text class="attack-emoji">{{attackEmoji}}</text>
+    </view>
+  </view>
+
+  <!-- 结果界面 -->
+  <view class="screen result-screen" wx:if="{{gameState === 'result'}}">
+    <view class="result-emoji">{{isWin ? '🏆' : '💀'}}</view>
+    <view class="result-title {{isWin ? '' : 'lose'}}">
+      {{isWin ? '🎉 奥特曼胜利！' : '😢 怪兽胜利！'}}
+    </view>
+
+    <view class="stats">
+      <view class="stat-box">
+        <text class="stat-number">{{correctCount}}</text>
+        <text class="stat-label">答对题数</text>
+      </view>
+      <view class="stat-box">
+        <text class="stat-number">{{wrongCount}}</text>
+        <text class="stat-label">答错题数</text>
+      </view>
+      <view class="stat-box">
+        <text class="stat-number">{{accuracy}}%</text>
+        <text class="stat-label">正确率</text>
+      </view>
+    </view>
+
+    <!-- 错题总结 -->
+    <view class="summary" wx:if="{{wrongQuestions.length > 0}}">
+      <view class="summary-title">📝 错题总结</view>
+      <view class="summary-list">
+        <view class="summary-item" wx:for="{{wrongQuestions}}" wx:key="index">
+          <text class="question-text-small">{{item.question}}</text>
+          <text class="your-answer">❌ 你的答案：{{item.yourAnswer}}</text>
+          <text class="correct-answer">✅ 正确答案：{{item.correctAnswer}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 全对提示 -->
+    <view class="summary" wx:else>
+      <view class="summary-title">🎉 太棒了！</view>
+      <text class="perfect-text">全部答对！继续加油！</text>
+    </view>
+
+    <view class="result-buttons">
+      <button class="action-btn primary" bindtap="restartGame">🔄 再玩一次</button>
+      <button class="action-btn" bindtap="viewRecords">📊 历史记录</button>
+    </view>
+  </view>
+</view>

@@ -185,3 +185,5 @@
 .submit-btn.disabled {
   background: #ccc;
 }
+
+@import 'index-wxa-auto-dark.wxss'

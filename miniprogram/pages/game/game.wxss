@@ -1,0 +1,447 @@
+/* pages/game/game.wxss */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a2a4a 0%, #0f1a3a 100%);
+  padding: 30rpx;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 20rpx #ffd700;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 24rpx;
+  color: #aaa;
+}
+
+.screen {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #00d4ff;
+  text-shadow: 0 0 10rpx #00d4ff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+}
+
+.character-card {
+  background: linear-gradient(135deg, #1a2a3a 0%, #2a3a5a 100%);
+  border: 3rpx solid #445;
+  border-radius: 20rpx;
+  padding: 20rpx 10rpx;
+  text-align: center;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.character-card:active {
+  transform: scale(0.95);
+}
+
+.character-card.selected {
+  border-color: #ffd700;
+  box-shadow: 0 0 30rpx rgba(255, 215, 0, 0.7);
+  transform: scale(1.05);
+}
+
+.character-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 10rpx;
+  right: 15rpx;
+  font-size: 32rpx;
+  color: #ffd700;
+}
+
+.character-image {
+  width: 100rpx;
+  height: 100rpx;
+  margin: 0 auto 15rpx;
+  border-radius: 15rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 3rpx solid;
+}
+
+.character-emoji {
+  font-size: 60rpx;
+}
+
+.character-name {
+  display: block;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 8rpx;
+}
+
+.character-desc {
+  display: block;
+  font-size: 20rpx;
+  color: #888;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+  color: #fff;
+  border: none;
+  padding: 25rpx 80rpx;
+  font-size: 32rpx;
+  border-radius: 100rpx;
+  margin: 40rpx auto;
+  display: block;
+  box-shadow: 0 10rpx 30rpx rgba(0, 212, 255, 0.5);
+  font-weight: bold;
+}
+
+.start-btn[disabled] {
+  background: #445;
+  box-shadow: none;
+}
+
+/* 战斗场景 */
+.battle-scene {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  border: 2rpx solid #334;
+}
+
+.fighter {
+  flex: 1;
+  text-align: center;
+}
+
+.fighter-image {
+  width: 140rpx;
+  height: 140rpx;
+  margin: 0 auto 20rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 4rpx solid;
+}
+
+.fighter-emoji {
+  font-size: 80rpx;
+}
+
+.health-bar {
+  width: 200rpx;
+  height: 40rpx;
+  background: #222;
+  border-radius: 20rpx;
+  margin: 15rpx auto;
+  overflow: hidden;
+  border: 3rpx solid #444;
+}
+
+.health-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff3333 0%, #ff6666 100%);
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 24rpx;
+}
+
+.health-fill.good {
+  background: linear-gradient(90deg, #33ff33 0%, #66ff66 100%);
+}
+
+.health-fill.warning {
+  background: linear-gradient(90deg, #ffaa00 0%, #ffcc00 100%);
+}
+
+.health-fill.danger {
+  background: linear-gradient(90deg, #ff3333 0%, #ff6666 100%);
+}
+
+.fighter-name {
+  display: block;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 15rpx;
+}
+
+.vs-symbol {
+  font-size: 50rpx;
+  color: #ff4444;
+  font-weight: bold;
+  margin: 0 40rpx;
+  text-shadow: 0 0 30rpx #ff4444;
+}
+
+/* 进度 */
+.progress {
+  text-align: center;
+  color: #00d4ff;
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+/* 题目区域 */
+.question-area {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  border: 2rpx solid #334;
+}
+
+.question-type {
+  text-align: center;
+  font-size: 24rpx;
+  color: #00d4ff;
+  margin-bottom: 20rpx;
+  font-weight: bold;
+}
+
+.question-text {
+  font-size: 36rpx;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 30rpx;
+  line-height: 1.6;
+  font-weight: bold;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.option-btn {
+  background: linear-gradient(135deg, #3a4a6a 0%, #2a3a5a 100%);
+  color: #fff;
+  border: 3rpx solid #556;
+  padding: 30rpx 20rpx;
+  font-size: 28rpx;
+  border-radius: 20rpx;
+  font-weight: bold;
+}
+
+.option-btn:active {
+  background: linear-gradient(135deg, #4a5a7a 0%, #3a4a6a 100%);
+  border-color: #00d4ff;
+}
+
+/* 攻击动画 */
+.attack-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.attack-emoji {
+  font-size: 200rpx;
+  animation: attackAnim 0.8s ease-out;
+}
+
+@keyframes attackAnim {
+  0% { opacity: 1; transform: scale(0.3) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.3) rotate(180deg); }
+  100% { opacity: 0; transform: scale(2) rotate(360deg); }
+}
+
+/* 结果界面 */
+.result-screen {
+  text-align: center;
+}
+
+.result-emoji {
+  font-size: 150rpx;
+  margin-bottom: 30rpx;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-30rpx); }
+}
+
+.result-title {
+  font-size: 48rpx;
+  color: #ffd700;
+  text-shadow: 0 0 30rpx #ffd700;
+  margin-bottom: 40rpx;
+}
+
+.result-title.lose {
+  color: #ff4444;
+  text-shadow: 0 0 30rpx #ff4444;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.stat-box {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 25rpx;
+  border-radius: 20rpx;
+  border: 2rpx solid #334;
+}
+
+.stat-number {
+  display: block;
+  font-size: 50rpx;
+  font-weight: bold;
+  color: #00d4ff;
+  margin-bottom: 10rpx;
+}
+
+.stat-label {
+  display: block;
+  font-size: 22rpx;
+  color: #aaa;
+}
+
+.summary {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  border: 2rpx solid #334;
+}
+
+.summary-title {
+  font-size: 32rpx;
+  color: #00d4ff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.summary-list {
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.summary-item {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20rpx;
+  margin-bottom: 15rpx;
+  border-radius: 15rpx;
+  border-left: 5rpx solid #ff4444;
+  text-align: left;
+}
+
+.question-text-small {
+  display: block;
+  font-size: 26rpx;
+  color: #fff;
+  margin-bottom: 10rpx;
+  font-weight: bold;
+}
+
+.your-answer {
+  display: block;
+  font-size: 24rpx;
+  color: #ff6666;
+  margin-bottom: 8rpx;
+}
+
+.correct-answer {
+  display: block;
+  font-size: 24rpx;
+  color: #66ff66;
+}
+
+.perfect-text {
+  display: block;
+  font-size: 32rpx;
+  color: #66ff66;
+  text-align: center;
+}
+
+.result-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #3a4a6a 0%, #2a3a5a 100%);
+  color: #fff;
+  border: none;
+  padding: 25rpx;
+  font-size: 28rpx;
+  border-radius: 100rpx;
+  font-weight: bold;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #00d4ff 0%, #0088cc 100%);
+}
+
+/* 响应式 */
+@media (max-width: 750rpx) {
+  .character-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .options {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-scene {
+    flex-direction: column;
+    gap: 30rpx;
+  }
+
+  .vs-symbol {
+    margin: 20rpx 0;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

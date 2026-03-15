@@ -1,9 +1,12 @@
 {
-  "pages": ["pages/index/index"],
+  "pages": [
+    "pages/game/game",
+    "pages/records/records"
+  ],
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#4A90D9",
-    "navigationBarTitleText": "AI 口语陪练",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#1a2a4a",
+    "navigationBarTitleText": "奥特曼打怪兽",
     "navigationBarTextStyle": "white"
   },
   "style": "v2",
