@@ -68,6 +68,10 @@ Page({
     console.log('游戏页面加载')
     this.loadUnlockedCharacters()
     this.initQuestions()
+    // 初始化难度名称
+    this.setData({
+      currentDifficultyName: this.getDifficultyName(this.data.selectedDifficulty)
+    })
   },
 
   onShow() {
@@ -184,8 +188,17 @@ Page({
   // 选择难度
   selectDifficulty(e) {
     const difficulty = e.currentTarget.dataset.id
-    this.setData({ selectedDifficulty: difficulty })
+    this.setData({ 
+      selectedDifficulty: difficulty,
+      currentDifficultyName: this.getDifficultyName(difficulty)
+    })
     this.vibrate()
+  },
+
+  // 获取难度名称
+  getDifficultyName(difficultyId) {
+    const diff = this.data.difficulties.find(d => d.id === difficultyId)
+    return diff ? diff.name : '4 岁'
   },
 
   // 设置题目数量

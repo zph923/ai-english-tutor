@@ -112,7 +112,7 @@
     </view>
 
     <view class="summary-box">
-      <text>已选题型：{{selectedTopics.length}}个 | 难度：{{difficulties.find(d => d.id === selectedDifficulty).name}} | 题量：{{questionCount}}题</text>
+      <text>已选题型：{{selectedTopics.length}}个 | 难度：{{currentDifficultyName}} | 题量：{{questionCount}}题</text>
     </view>
 
     <view class="action-buttons">
