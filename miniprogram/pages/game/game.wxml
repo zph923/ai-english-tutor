@@ -159,8 +159,8 @@
 
     <!-- 题目区域 -->
     <view class="question-area" wx:if="{{currentQuestion}}">
-      <view class="question-type-badge" style="background: {{availableTopics.find(t => t.id === currentQuestion.type).color}};">
-        {{availableTopics.find(t => t.id === currentQuestion.type).icon}} {{availableTopics.find(t => t.id === currentQuestion.type).name}}
+      <view class="question-type-badge" style="background: {{currentTopicColor}};">
+        {{currentTopicIcon}} {{currentTopicName}}
       </view>
       <view class="question-text">{{currentQuestion.q}}</view>
       <view class="options">

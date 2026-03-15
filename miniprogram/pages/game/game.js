@@ -308,9 +308,15 @@ Page({
 
     const question = questions[currentQuestionIndex]
     
+    // 获取题型信息
+    const topic = this.data.availableTopics.find(t => t.id === question.type)
+    
     this.setData({
       currentQuestion: question,
-      canAnswer: true
+      canAnswer: true,
+      currentTopicColor: topic ? topic.color : '#00d4ff',
+      currentTopicIcon: topic ? topic.icon : '📚',
+      currentTopicName: topic ? topic.name : '未知'
     })
   },
 
