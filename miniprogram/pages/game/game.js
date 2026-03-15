@@ -152,7 +152,7 @@ Page({
     
     console.log('当前索引', currentQuestionIndex)
     console.log('题目数量', questions.length)
-    console.log '奥特曼血量', this.data.ultramanHealth)
+    console.log('奥特曼血量', this.data.ultramanHealth)
     console.log('怪兽血量', this.data.monsterHealth)
     
     if (currentQuestionIndex >= questions.length || 
