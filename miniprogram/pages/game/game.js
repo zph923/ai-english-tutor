@@ -163,13 +163,17 @@ Page({
     const topicId = e.currentTarget.dataset.id
     let { selectedTopics } = this.data
     
+    console.log('切换题型', topicId, '当前已选', selectedTopics)
+    
     const index = selectedTopics.indexOf(topicId)
     if (index > -1) {
       // 取消选择
       selectedTopics.splice(index, 1)
+      console.log('取消选择', topicId)
     } else {
       // 添加选择
       selectedTopics.push(topicId)
+      console.log('添加选择', topicId)
     }
     
     // 至少选择一个题型
@@ -181,7 +185,11 @@ Page({
       selectedTopics.push(topicId)
     }
     
-    this.setData({ selectedTopics })
+    console.log('更新后已选', selectedTopics)
+    
+    this.setData({ 
+      selectedTopics: [...selectedTopics] // 创建新数组触发更新
+    })
     this.vibrate()
   },
 
@@ -241,7 +249,7 @@ Page({
     const { selectedTopics, selectedDifficulty, questionCount } = this.data
     const allQuestions = []
     
-    console.log('生成题目')
+    console.log('========== 生成题目 ==========')
     console.log('选题型', selectedTopics)
     console.log('难度', selectedDifficulty)
     console.log('题量', questionCount)
@@ -250,14 +258,20 @@ Page({
     const fullBank = require('../../data/questions-full.js')
     const ageBank = fullBank[selectedDifficulty] || fullBank.age4
     
+    console.log('年龄题库', selectedDifficulty, '题目数量:', ageBank ? '有数据' : '无数据')
+    
     // 如果没有选择题型，默认全选
     const topics = selectedTopics.length > 0 ? selectedTopics : ['math', 'knowledge', 'english', 'color', 'logic', 'common']
+    console.log('最终题型列表', topics)
     
     // 从每个题型中随机选题
     topics.forEach(topic => {
       const topicQuestions = ageBank[topic] || []
+      console.log('题型', topic, '题目数量:', topicQuestions.length)
+      
       // 每个题型至少选 1 题
       const count = Math.max(1, Math.floor(questionCount / topics.length))
+      console.log('该题型应选', count, '题')
       
       for (let i = 0; i < count && i < topicQuestions.length; i++) {
         const q = topicQuestions[Math.floor(Math.random() * topicQuestions.length)]
@@ -268,8 +282,11 @@ Page({
           type: topic,
           difficulty: q.difficulty || 1
         })
+        console.log('  添加题目:', q.q.substring(0, 20))
       }
     })
+    
+    console.log('当前题目总数:', allQuestions.length)
     
     // 如果题目不够，随机补充
     while (allQuestions.length < questionCount) {
@@ -283,6 +300,7 @@ Page({
           ans: q.ans,
           type: randomTopic
         })
+        console.log('补充题目:', q.q.substring(0, 20))
       } else {
         break
       }
@@ -291,8 +309,10 @@ Page({
     // 截取指定数量
     const questions = allQuestions.slice(0, questionCount)
     
+    console.log('最终题目数量:', questions.length)
+    console.log('================================')
+    
     this.setData({ questions })
-    console.log('题目生成完成，共', questions.length, '题')
   },
 
   // 显示题目
