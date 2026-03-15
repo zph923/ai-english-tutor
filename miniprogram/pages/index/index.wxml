@@ -13,7 +13,16 @@
     <!-- 聊天记录 -->
     <view class="message {{item.type}}" wx:for="{{chatHistory}}" wx:key="id">
       <view class="message-avatar">{{item.type === 'user' ? '👤' : '🤖'}}</view>
-      <view class="message-content">{{item.content}}</view>
+      <view class="message-content-wrapper">
+        <view class="message-content">{{item.content}}</view>
+        
+        <!-- AI 消息的播放按钮 -->
+        <view class="message-actions" wx:if="{{item.type === 'ai'}}">
+          <button class="speak-btn {{isPlaying && currentPlayingId === item.id ? 'playing' : ''}}" bindtap="speak" data-text="{{item.content}}" data-id="{{item.id}}">
+            {{isPlaying && currentPlayingId === item.id ? '🔇 停止' : '🔊 播放'}}
+          </button>
+        </view>
+      </view>
     </view>
     
     <!-- 加载中 -->
@@ -26,7 +35,9 @@
   </view>
 
   <view class="input-area">
-    <button class="clear-btn" bindtap="onClear" wx:if="{{chatHistory.length > 0}}">清空</button>
+    <button class="voice-btn {{isRecording ? 'recording' : ''}}" bindtap="onStartRecord">
+      {{isRecording ? '🔴 停止' : '🎤 语音'}}
+    </button>
     <input 
       class="input" 
       placeholder="输入你想练习的话题..." 
