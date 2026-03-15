@@ -228,7 +228,7 @@ Page({
 
   // 开始游戏
   startGame() {
-    console.log('开始游戏')
+    console.log('========== 开始游戏 ==========')
     
     if (!this.data.selectedUltraman || !this.data.selectedMonster) {
       wx.showToast({
@@ -237,21 +237,35 @@ Page({
       })
       return
     }
+    
+    console.log('选择的奥特曼:', this.data.selectedUltraman.name)
+    console.log('选择的怪兽:', this.data.selectedMonster.name)
+    console.log('选题型:', this.data.selectedTopics)
+    console.log('难度:', this.data.selectedDifficulty)
+    console.log('题量:', this.data.questionCount)
 
     // 生成题目
+    console.log('开始生成题目...')
     this.generateQuestions()
-
-    this.setData({
-      gameState: 'battle',
-      ultramanHealth: 10,
-      monsterHealth: 10,
-      currentQuestionIndex: 0,
-      wrongQuestions: [],
-      correctCount: 0
-    })
-
-    this.vibrate()
-    this.showQuestion()
+    
+    // 等待题目生成后再设置状态
+    setTimeout(() => {
+      console.log('题目生成完成，设置游戏状态...')
+      
+      this.setData({
+        gameState: 'battle',
+        ultramanHealth: 10,
+        monsterHealth: 10,
+        currentQuestionIndex: 0,
+        wrongQuestions: [],
+        correctCount: 0
+      }, () => {
+        console.log('游戏状态设置完成')
+        this.vibrate()
+        console.log('准备显示第一题...')
+        this.showQuestion()
+      })
+    }, 100)
   },
 
   // 生成题目
@@ -269,20 +283,38 @@ Page({
     const fullBank = require('../../data/questions-full.js')
     const ageBank = fullBank[selectedDifficulty] || fullBank.age4
     
-    console.log('年龄题库', selectedDifficulty, '题目数量:', ageBank ? '有数据' : '无数据')
+    console.log('年龄题库', selectedDifficulty)
+    if (!ageBank) {
+      console.error('错误：找不到题库数据！')
+      wx.showToast({
+        title: '题库数据错误',
+        icon: 'none'
+      })
+      return
+    }
     
     // 如果没有选择题型，默认全选
     const topics = selectedTopics.length > 0 ? selectedTopics : ['math', 'knowledge', 'english', 'color', 'logic', 'common']
     console.log('最终题型列表', topics)
     
-    // 从每个题型中随机选题（不重复）
+    // 检查每个题型是否有数据
     topics.forEach(topic => {
       const topicQuestions = ageBank[topic] || []
       console.log('题型', topic, '题目数量:', topicQuestions.length)
+    })
+    
+    // 从每个题型中随机选题（不重复）
+    topics.forEach(topic => {
+      const topicQuestions = ageBank[topic] || []
+      
+      if (topicQuestions.length === 0) {
+        console.log('题型', topic, '没有数据，跳过')
+        return
+      }
       
       // 每个题型至少选 1 题
       const count = Math.max(1, Math.floor(questionCount / topics.length))
-      console.log('该题型应选', count, '题')
+      console.log('题型', topic, '应选', count, '题')
       
       // 打乱题目顺序
       const shuffled = this.shuffleArray([...topicQuestions])
@@ -311,9 +343,12 @@ Page({
     while (allQuestions.length < questionCount) {
       const randomTopic = topics[Math.floor(Math.random() * topics.length)]
       const topicQuestions = ageBank[randomTopic] || []
+      
       if (topicQuestions.length > 0) {
         const shuffled = this.shuffleArray([...topicQuestions])
-        for (let i = 0; i < shuffled.length && allQuestions.length < questionCount; i++) {
+        let added = false
+        
+        for (let i = 0; i < shuffled.length && !added; i++) {
           const q = shuffled[i]
           const key = q.q
           
@@ -326,10 +361,17 @@ Page({
               type: randomTopic
             })
             console.log('补充题目:', q.q.substring(0, 20))
-            break
+            added = true
           }
         }
-      } else {
+      }
+      
+      // 如果所有题型都用完了，退出循环
+      const totalAvailable = topics.reduce((sum, topic) => {
+        return sum + (ageBank[topic] || []).length
+      }, 0)
+      
+      if (allQuestions.length >= totalAvailable || allQuestions.length >= questionCount) {
         break
       }
     }
@@ -338,6 +380,15 @@ Page({
     const questions = allQuestions.slice(0, questionCount)
     
     console.log('最终题目数量:', questions.length)
+    
+    if (questions.length === 0) {
+      console.error('错误：没有生成任何题目！')
+      wx.showToast({
+        title: '题目生成失败',
+        icon: 'none'
+      })
+    }
+    
     console.log('================================')
     
     this.setData({ questions })
@@ -357,14 +408,36 @@ Page({
   showQuestion() {
     const { currentQuestionIndex, questions } = this.data
     
-    if (currentQuestionIndex >= questions.length || 
-        this.data.ultramanHealth <= 0 || 
-        this.data.monsterHealth <= 0) {
+    console.log('========== 显示题目 ==========')
+    console.log('当前索引:', currentQuestionIndex)
+    console.log('题目总数:', questions.length)
+    console.log('奥特曼血量:', this.data.ultramanHealth)
+    console.log('怪兽血量:', this.data.monsterHealth)
+    
+    if (questions.length === 0) {
+      console.error('错误：题目数组为空！')
+      wx.showToast({
+        title: '题目生成失败',
+        icon: 'none'
+      })
+      return
+    }
+    
+    if (currentQuestionIndex >= questions.length) {
+      console.log('题目已答完，结束游戏')
+      this.endGame()
+      return
+    }
+    
+    if (this.data.ultramanHealth <= 0 || this.data.monsterHealth <= 0) {
+      console.log('血量归零，结束游戏')
       this.endGame()
       return
     }
 
     const question = questions[currentQuestionIndex]
+    console.log('当前题目:', question.q)
+    console.log('题目类型:', question.type)
     
     // 获取题型信息
     const topic = this.data.availableTopics.find(t => t.id === question.type)
@@ -376,6 +449,9 @@ Page({
       currentTopicIcon: topic ? topic.icon : '📚',
       currentTopicName: topic ? topic.name : '未知'
     })
+    
+    console.log('题目显示完成')
+    console.log('================================')
   },
 
   // 选择答案
