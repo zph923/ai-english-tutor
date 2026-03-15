@@ -163,16 +163,20 @@ Page({
     const topicId = e.currentTarget.dataset.id
     let { selectedTopics } = this.data
     
-    console.log('切换题型', topicId, '当前已选', selectedTopics)
+    console.log('========== 切换题型 ==========')
+    console.log('点击的题型 ID:', topicId)
+    console.log('当前已选:', selectedTopics)
     
     const index = selectedTopics.indexOf(topicId)
+    console.log('当前索引:', index)
+    
     if (index > -1) {
       // 取消选择
       selectedTopics.splice(index, 1)
       console.log('取消选择', topicId)
     } else {
       // 添加选择
-      selectedTopics.push(topicId)
+      selectedTopics = [...selectedTopics, topicId]
       console.log('添加选择', topicId)
     }
     
@@ -182,14 +186,20 @@ Page({
         title: '至少选择一个题型',
         icon: 'none'
       })
-      selectedTopics.push(topicId)
+      selectedTopics = [topicId]
     }
     
-    console.log('更新后已选', selectedTopics)
+    console.log('更新后已选:', selectedTopics)
+    console.log('================================')
     
+    // 强制触发视图更新
     this.setData({ 
-      selectedTopics: [...selectedTopics] // 创建新数组触发更新
+      selectedTopics: selectedTopics,
+      selectedTopicsStr: selectedTopics.join(',') // 用于调试
+    }, () => {
+      console.log('setData 完成，当前 selectedTopics:', this.data.selectedTopics)
     })
+    
     this.vibrate()
   },
 
@@ -248,6 +258,7 @@ Page({
   generateQuestions() {
     const { selectedTopics, selectedDifficulty, questionCount } = this.data
     const allQuestions = []
+    const usedQuestions = new Set() // 去重
     
     console.log('========== 生成题目 ==========')
     console.log('选题型', selectedTopics)
@@ -264,7 +275,7 @@ Page({
     const topics = selectedTopics.length > 0 ? selectedTopics : ['math', 'knowledge', 'english', 'color', 'logic', 'common']
     console.log('最终题型列表', topics)
     
-    // 从每个题型中随机选题
+    // 从每个题型中随机选题（不重复）
     topics.forEach(topic => {
       const topicQuestions = ageBank[topic] || []
       console.log('题型', topic, '题目数量:', topicQuestions.length)
@@ -273,34 +284,51 @@ Page({
       const count = Math.max(1, Math.floor(questionCount / topics.length))
       console.log('该题型应选', count, '题')
       
-      for (let i = 0; i < count && i < topicQuestions.length; i++) {
-        const q = topicQuestions[Math.floor(Math.random() * topicQuestions.length)]
-        allQuestions.push({
-          q: q.q,
-          a: q.a,
-          ans: q.ans,
-          type: topic,
-          difficulty: q.difficulty || 1
-        })
-        console.log('  添加题目:', q.q.substring(0, 20))
+      // 打乱题目顺序
+      const shuffled = this.shuffleArray([...topicQuestions])
+      
+      for (let i = 0; i < count && i < shuffled.length; i++) {
+        const q = shuffled[i]
+        const key = q.q // 用题目作为唯一标识
+        
+        if (!usedQuestions.has(key)) {
+          usedQuestions.add(key)
+          allQuestions.push({
+            q: q.q,
+            a: q.a,
+            ans: q.ans,
+            type: topic,
+            difficulty: q.difficulty || 1
+          })
+          console.log('  添加题目:', q.q.substring(0, 20))
+        }
       }
     })
     
     console.log('当前题目总数:', allQuestions.length)
     
-    // 如果题目不够，随机补充
+    // 如果题目不够，随机补充（不重复）
     while (allQuestions.length < questionCount) {
       const randomTopic = topics[Math.floor(Math.random() * topics.length)]
       const topicQuestions = ageBank[randomTopic] || []
       if (topicQuestions.length > 0) {
-        const q = topicQuestions[Math.floor(Math.random() * topicQuestions.length)]
-        allQuestions.push({
-          q: q.q,
-          a: q.a,
-          ans: q.ans,
-          type: randomTopic
-        })
-        console.log('补充题目:', q.q.substring(0, 20))
+        const shuffled = this.shuffleArray([...topicQuestions])
+        for (let i = 0; i < shuffled.length && allQuestions.length < questionCount; i++) {
+          const q = shuffled[i]
+          const key = q.q
+          
+          if (!usedQuestions.has(key)) {
+            usedQuestions.add(key)
+            allQuestions.push({
+              q: q.q,
+              a: q.a,
+              ans: q.ans,
+              type: randomTopic
+            })
+            console.log('补充题目:', q.q.substring(0, 20))
+            break
+          }
+        }
       } else {
         break
       }
@@ -313,6 +341,16 @@ Page({
     console.log('================================')
     
     this.setData({ questions })
+  },
+
+  // 洗牌算法（打乱数组）
+  shuffleArray(array) {
+    const newArray = [...array]
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+    }
+    return newArray
   },
 
   // 显示题目

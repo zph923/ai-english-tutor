@@ -176,10 +176,19 @@
 }
 
 .topic-card.selected {
-  border-color: #66ff66;
-  background: linear-gradient(135deg, #2a5a3a 0%, #1a4a2a 100%);
-  box-shadow: 0 0 25rpx rgba(102, 255, 102, 0.6);
+  border-color: #66ff66 !important;
+  background: linear-gradient(135deg, #2a5a3a 0%, #1a4a2a 100%) !important;
+  box-shadow: 0 0 30rpx rgba(102, 255, 102, 0.8) !important;
   transform: scale(1.05);
+}
+
+.topic-card.selected .topic-name {
+  color: #66ff66;
+  font-weight: bold;
+}
+
+.topic-card.selected .topic-icon {
+  border-color: #66ff66;
 }
 
 .topic-icon {
