@@ -1,0 +1,5 @@
+/* app.wxss */
+page {
+  background: linear-gradient(180deg, #1a2a4a 0%, #0f1a3a 100%);
+  min-height: 100vh;
+}

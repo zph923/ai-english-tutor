@@ -14,8 +14,9 @@
           class="character-card {{selectedUltraman && selectedUltraman.id === u.id ? 'selected' : ''}}"
           wx:for="{{ultramen}}"
           wx:key="id"
-          data-index="{{index}}"
-          bindtap="selectUltraman">
+          wx:for-item="u"
+          bindtap="selectUltraman"
+          data-index="{{index}}">
           <view class="character-image" style="background: {{u.color}}22; border-color: {{u.color}};">
             <text class="character-emoji">{{u.image}}</text>
           </view>
@@ -32,8 +33,9 @@
           class="character-card {{selectedMonster && selectedMonster.id === m.id ? 'selected' : ''}}"
           wx:for="{{monsters}}"
           wx:key="id"
-          data-index="{{index}}"
-          bindtap="selectMonster">
+          wx:for-item="m"
+          bindtap="selectMonster"
+          data-index="{{index}}">
           <view class="character-image" style="background: {{m.color}}22; border-color: {{m.color}};">
             <text class="character-emoji">{{m.image}}</text>
           </view>
@@ -86,16 +88,17 @@
 
     <!-- 题目区域 -->
     <view class="question-area" wx:if="{{currentQuestion}}">
-      <view class="question-type">{{currentQuestion.type}}</view>
+      <view class="question-type">【{{currentQuestion.type}}】</view>
       <view class="question-text">{{currentQuestion.q}}</view>
       <view class="options">
         <button 
           class="option-btn"
           wx:for="{{currentQuestion.a}}"
           wx:key="index"
-          data-index="{{index}}"
-          bindtap="selectAnswer">
-          {{item}}
+          wx:for-item="option"
+          bindtap="selectAnswer"
+          data-index="{{index}}">
+          {{option}}
         </button>
       </view>
     </view>
@@ -132,7 +135,7 @@
     <view class="summary" wx:if="{{wrongQuestions.length > 0}}">
       <view class="summary-title">📝 错题总结</view>
       <view class="summary-list">
-        <view class="summary-item" wx:for="{{wrongQuestions}}" wx:key="index">
+        <view class="summary-item" wx:for="{{wrongQuestions}}" wx:key="index" wx:for-item="item">
           <text class="question-text-small">{{item.question}}</text>
           <text class="your-answer">❌ 你的答案：{{item.yourAnswer}}</text>
           <text class="correct-answer">✅ 正确答案：{{item.correctAnswer}}</text>

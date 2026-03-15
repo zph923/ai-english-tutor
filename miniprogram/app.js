@@ -1,9 +1,10 @@
+// app.js
 App({
   onLaunch() {
-    console.log('AI English Tutor App Launch')
+    console.log('小程序启动')
   },
+  
   globalData: {
-    userInfo: null,
-    apiBaseUrl: '' // 后端 API 地址
+    userInfo: null
   }
 })
