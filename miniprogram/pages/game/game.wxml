@@ -2,7 +2,7 @@
 <view class="container">
   <view class="header">
     <text class="title">🌟 条宝奥特曼打怪兽 🌟</text>
-    <text class="subtitle">答题赢胜利！适合 3-4 岁宝宝</text>
+    <text class="subtitle">答题赢胜利！适合 3-8 岁宝宝</text>
   </view>
 
   <!-- 角色选择界面 -->
@@ -11,7 +11,7 @@
       <view class="section-title">🦸 选择你的奥特曼</view>
       <view class="character-grid">
         <view 
-          class="character-card {{selectedUltraman && selectedUltraman.id === u.id ? 'selected' : ''}}"
+          class="character-card {{selectedUltraman && selectedUltraman.id === u.id ? 'selected' : ''}} {{!u.isFree && !isUnlocked(u.id) ? 'locked' : ''}}"
           wx:for="{{ultramen}}"
           wx:key="id"
           wx:for-item="u"
@@ -19,6 +19,7 @@
           data-index="{{index}}">
           <view class="character-image" style="background: {{u.color}}22; border-color: {{u.color}};">
             <text class="character-emoji">{{u.image}}</text>
+            <view class="lock-icon" wx:if="{{!u.isFree && !isUnlocked(u.id)}}">🔒</view>
           </view>
           <text class="character-name">{{u.name}}</text>
           <text class="character-desc">{{u.desc}}</text>
@@ -30,7 +31,7 @@
       <view class="section-title">👾 选择怪兽</view>
       <view class="character-grid">
         <view 
-          class="character-card {{selectedMonster && selectedMonster.id === m.id ? 'selected' : ''}}"
+          class="character-card {{selectedMonster && selectedMonster.id === m.id ? 'selected' : ''}} {{!m.isFree && !isUnlocked(m.id) ? 'locked' : ''}}"
           wx:for="{{monsters}}"
           wx:key="id"
           wx:for-item="m"
@@ -38,6 +39,7 @@
           data-index="{{index}}">
           <view class="character-image" style="background: {{m.color}}22; border-color: {{m.color}};">
             <text class="character-emoji">{{m.image}}</text>
+            <view class="lock-icon" wx:if="{{!m.isFree && !isUnlocked(m.id)}}">🔒</view>
           </view>
           <text class="character-name">{{m.name}}</text>
           <text class="character-desc">{{m.desc}}</text>
@@ -45,9 +47,78 @@
       </view>
     </view>
 
-    <button class="start-btn" bindtap="startGame" disabled="{{!selectedUltraman || !selectedMonster}}">
-      ⚔️ 开始战斗
-    </button>
+    <view class="action-buttons">
+      <button class="action-btn shop-btn" bindtap="goToShop">🏪 角色商店</button>
+      <button class="action-btn primary" bindtap="goToTopicSelect" disabled="{{!selectedUltraman || !selectedMonster}}">
+        ⚔️ 选择题目
+      </button>
+    </view>
+  </view>
+
+  <!-- 题型选择界面 -->
+  <view class="screen" wx:if="{{gameState === 'topic'}}">
+    <view class="panel-header">
+      <button class="back-small-btn" bindtap="goBack">← 返回</button>
+      <text class="panel-title">📚 选择题型</text>
+      <view class="placeholder"></view>
+    </view>
+
+    <view class="topic-grid">
+      <view 
+        class="topic-card {{selectedTopics.indexOf(t.id) > -1 ? 'selected' : ''}}"
+        wx:for="{{availableTopics}}"
+        wx:key="id"
+        wx:for-item="t"
+        bindtap="toggleTopic"
+        data-id="{{t.id}}">
+        <view class="topic-icon" style="background: {{t.color}}22;">{{t.icon}}</view>
+        <text class="topic-name">{{t.name}}</text>
+        <text class="topic-count">{{t.count}}题</text>
+        <view class="topic-check" wx:if="{{selectedTopics.indexOf(t.id) > -1}}">✓</view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">🎯 选择难度</view>
+      <view class="difficulty-grid">
+        <view 
+          class="difficulty-card {{selectedDifficulty === d.id ? 'selected' : ''}}"
+          wx:for="{{difficulties}}"
+          wx:key="id"
+          wx:for-item="d"
+          bindtap="selectDifficulty"
+          data-id="{{d.id}}">
+          <text class="difficulty-icon">{{d.icon}}</text>
+          <text class="difficulty-name">{{d.name}}</text>
+          <text class="difficulty-desc">{{d.desc}}</text>
+          <text class="difficulty-stars">{{d.stars}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">📊 题目数量</view>
+      <view class="count-selector">
+        <view 
+          class="count-card {{questionCount === c ? 'selected' : ''}}"
+          wx:for="{{[5, 10, 15, 20]}}"
+          wx:key="*this"
+          bindtap="setQuestionCount"
+          data-count="{{item}}">
+          <text class="count-number">{{item}}</text>
+          <text class="count-label">题</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="summary-box">
+      <text>已选题型：{{selectedTopics.length}}个 | 难度：{{difficulties.find(d => d.id === selectedDifficulty).name}} | 题量：{{questionCount}}题</text>
+    </view>
+
+    <view class="action-buttons">
+      <button class="action-btn" bindtap="goBack">返回</button>
+      <button class="action-btn primary" bindtap="startGame">🎮 开始游戏</button>
+    </view>
   </view>
 
   <!-- 战斗界面 -->
@@ -84,11 +155,13 @@
     </view>
 
     <!-- 进度 -->
-    <view class="progress">第 {{currentQuestionIndex + 1}} / 10 题</view>
+    <view class="progress">第 {{currentQuestionIndex + 1}} / {{questionCount}} 题</view>
 
     <!-- 题目区域 -->
     <view class="question-area" wx:if="{{currentQuestion}}">
-      <view class="question-type">【{{currentQuestion.type}}】</view>
+      <view class="question-type-badge" style="background: {{availableTopics.find(t => t.id === currentQuestion.type).color}};">
+        {{availableTopics.find(t => t.id === currentQuestion.type).icon}} {{availableTopics.find(t => t.id === currentQuestion.type).name}}
+      </view>
       <view class="question-text">{{currentQuestion.q}}</view>
       <view class="options">
         <button 
@@ -150,7 +223,8 @@
     </view>
 
     <view class="result-buttons">
-      <button class="action-btn primary" bindtap="restartGame">🔄 再玩一次</button>
+      <button class="action-btn primary" bindtap="playAgain">🔄 再来一局</button>
+      <button class="action-btn" bindtap="restartGame">🏠 返回首页</button>
       <button class="action-btn" bindtap="viewRecords">📊 历史记录</button>
     </view>
   </view>

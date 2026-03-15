@@ -1,12 +1,39 @@
 // pages/game/game.js
 const questionBank = require('../../data/questions.js')
+const characters = require('../../data/characters.js')
 
 Page({
   data: {
-    // 游戏状态
-    gameState: 'select', // select, battle, result
+    // 游戏状态：select, topic, difficulty, battle, result
+    gameState: 'select',
+    
+    // 角色选择
     selectedUltraman: null,
     selectedMonster: null,
+    
+    // 题型选择
+    selectedTopics: [], // 已选题型
+    availableTopics: [
+      { id: 'math', name: '📐 数学', icon: '📐', color: '#4CAF50', count: 50 },
+      { id: 'knowledge', name: '🧠 认知', icon: '🧠', color: '#2196F3', count: 40 },
+      { id: 'english', name: '🔤 英语', icon: '🔤', color: '#FF9800', count: 40 },
+      { id: 'color', name: '🎨 颜色', icon: '🎨', color: '#E91E63', count: 30 },
+      { id: 'logic', name: '💡 逻辑', icon: '💡', color: '#9C27B0', count: 25 },
+      { id: 'common', name: '📚 常识', icon: '📚', color: '#00BCD4', count: 15 }
+    ],
+    
+    // 难度选择
+    selectedDifficulty: 'age4',
+    difficulties: [
+      { id: 'age3', name: '3 岁', icon: '👶', desc: '启蒙阶段', stars: '⭐' },
+      { id: 'age4', name: '4 岁', icon: '🧒', desc: '基础阶段', stars: '⭐⭐' },
+      { id: 'age5', name: '5 岁', icon: '👦', desc: '进阶阶段', stars: '⭐⭐⭐' },
+      { id: 'age6', name: '6 岁', icon: '👧', desc: '提高阶段', stars: '⭐⭐⭐⭐' },
+      { id: 'age7_8', name: '7-8 岁', icon: '🎓', desc: '挑战阶段', stars: '⭐⭐⭐⭐⭐' }
+    ],
+    
+    // 游戏设置
+    questionCount: 10, // 题目数量
     
     // 战斗状态
     ultramanHealth: 10,
@@ -17,19 +44,8 @@ Page({
     correctCount: 0,
     
     // 角色数据
-    ultramen: [
-      { id: 1, name: '迪迦奥特曼', color: '#ff6600', image: '🦸‍️', desc: '光之巨人' },
-      { id: 2, name: '赛罗奥特曼', color: '#00aaff', image: '🦸', desc: '最强战士' },
-      { id: 3, name: '泰迦奥特曼', color: '#ff3366', image: '⚡', desc: '泰罗之子' },
-      { id: 4, name: '泽塔奥特曼', color: '#cc00ff', image: '🌟', desc: '宇宙拳法' }
-    ],
-    
-    monsters: [
-      { id: 1, name: '哥莫拉', color: '#886644', image: '🦖', desc: '古代怪兽' },
-      { id: 2, name: '巴尔坦星人', color: '#88cc88', image: '👽', desc: '宇宙忍者' },
-      { id: 3, name: '杰顿', color: '#ffaa00', image: '👾', desc: '最强怪兽' },
-      { id: 4, name: '贝利亚', color: '#aa0000', image: '😈', desc: '黑暗奥特曼' }
-    ],
+    ultramen: characters.ultramen,
+    monsters: characters.monsters,
     
     // 当前题目
     currentQuestion: null,
@@ -38,68 +54,62 @@ Page({
     // 动画
     showAttack: false,
     attackEmoji: '',
-    attackPosition: 'left',
     
     // 结果
     isWin: false,
     accuracy: 0,
-    wrongCount: 0
+    wrongCount: 0,
+    
+    // 已解锁角色
+    unlockedCharacters: []
   },
 
   onLoad() {
     console.log('游戏页面加载')
+    this.loadUnlockedCharacters()
     this.initQuestions()
+  },
+
+  onShow() {
+    this.loadUnlockedCharacters()
+  },
+
+  // 加载已解锁角色
+  loadUnlockedCharacters() {
+    const unlocked = wx.getStorageSync('unlockedCharacters') || []
+    this.setData({ unlockedCharacters: unlocked })
+  },
+
+  // 判断角色是否已解锁
+  isUnlocked(id) {
+    return this.data.unlockedCharacters.includes(id)
   },
 
   // 初始化题目
   initQuestions() {
     console.log('初始化题目')
-    // 合并所有类型的题目
-    const allQuestions = []
-    
-    // 从题库中随机选择题
-    const types = ['math', 'knowledge', 'english', 'color', 'logic', 'common']
-    
-    for (let i = 0; i < 10; i++) {
-      const type = types[i % types.length]
-      const typeQuestions = questionBank[type] || []
-      if (typeQuestions.length > 0) {
-        const randomIndex = Math.floor(Math.random() * typeQuestions.length)
-        const q = typeQuestions[randomIndex]
-        allQuestions.push({
-          q: q.q,
-          a: q.a,
-          ans: q.ans,
-          type: type
-        })
-      }
-    }
-    
-    // 如果题目不够，用数学题补充
-    while (allQuestions.length < 10) {
-      const mathQuestions = questionBank.math
-      const randomIndex = Math.floor(Math.random() * mathQuestions.length)
-      const q = mathQuestions[randomIndex]
-      allQuestions.push({
-        q: q.q,
-        a: q.a,
-        ans: q.ans,
-        type: 'math'
-      })
-    }
-    
-    this.setData({
-      questions: allQuestions
-    })
-    console.log('题目初始化完成，共', allQuestions.length, '题')
   },
 
   // 选择奥特曼
   selectUltraman(e) {
-    console.log('选择奥特曼', e)
     const index = e.currentTarget.dataset.index
     const ultraman = this.data.ultramen[index]
-    console.log('选中的奥特曼', ultraman)
+    
+    // 检查是否解锁
+    if (!ultraman.isFree && !this.isUnlocked(ultraman.id)) {
+      wx.showToast({
+        title: '请先解锁角色',
+        icon: 'none'
+      })
+      // 跳转到商店
+      setTimeout(() => {
+        wx.navigateTo({
+          url: '/pages/shop/shop'
+        })
+      }, 1000)
+      return
+    }
+    
     this.setData({
       selectedUltraman: ultraman
     })
@@ -108,29 +118,97 @@ Page({
 
   // 选择怪兽
   selectMonster(e) {
-    console.log('选择怪兽', e)
     const index = e.currentTarget.dataset.index
     const monster = this.data.monsters[index]
-    console.log('选中的怪兽', monster)
+    
+    // 检查是否解锁
+    if (!monster.isFree && !this.isUnlocked(monster.id)) {
+      wx.showToast({
+        title: '请先解锁角色',
+        icon: 'none'
+      })
+      setTimeout(() => {
+        wx.navigateTo({
+          url: '/pages/shop/shop'
+        })
+      }, 1000)
+      return
+    }
+    
     this.setData({
       selectedMonster: monster
     })
     this.vibrate()
   },
 
-  // 开始游戏
-  startGame() {
-    console.log('开始游戏')
-    console.log('奥特曼', this.data.selectedUltraman)
-    console.log('怪兽', this.data.selectedMonster)
-    
+  // 进入题型选择
+  goToTopicSelect() {
     if (!this.data.selectedUltraman || !this.data.selectedMonster) {
       wx.showToast({
-        title: '请选择角色',
+        title: '请先选择角色',
         icon: 'none'
       })
       return
     }
+    this.setData({ gameState: 'topic' })
+    this.vibrate()
+  },
+
+  // 切换题型选择
+  toggleTopic(e) {
+    const topicId = e.currentTarget.dataset.id
+    let { selectedTopics } = this.data
+    
+    const index = selectedTopics.indexOf(topicId)
+    if (index > -1) {
+      // 取消选择
+      selectedTopics.splice(index, 1)
+    } else {
+      // 添加选择
+      selectedTopics.push(topicId)
+    }
+    
+    // 至少选择一个题型
+    if (selectedTopics.length === 0) {
+      wx.showToast({
+        title: '至少选择一个题型',
+        icon: 'none'
+      })
+      selectedTopics.push(topicId)
+    }
+    
+    this.setData({ selectedTopics })
+    this.vibrate()
+  },
+
+  // 选择难度
+  selectDifficulty(e) {
+    const difficulty = e.currentTarget.dataset.id
+    this.setData({ selectedDifficulty: difficulty })
+    this.vibrate()
+  },
+
+  // 设置题目数量
+  setQuestionCount(e) {
+    const count = parseInt(e.currentTarget.dataset.count)
+    this.setData({ questionCount: count })
+    this.vibrate()
+  },
+
+  // 开始游戏
+  startGame() {
+    console.log('开始游戏')
+    
+    if (!this.data.selectedUltraman || !this.data.selectedMonster) {
+      wx.showToast({
+        title: '请先选择角色',
+        icon: 'none'
+      })
+      return
+    }
+
+    // 生成题目
+    this.generateQuestions()
 
     this.setData({
       gameState: 'battle',
@@ -145,26 +223,77 @@ Page({
     this.showQuestion()
   },
 
+  // 生成题目
+  generateQuestions() {
+    const { selectedTopics, selectedDifficulty, questionCount } = this.data
+    const allQuestions = []
+    
+    console.log('生成题目')
+    console.log('选题型', selectedTopics)
+    console.log('难度', selectedDifficulty)
+    console.log('题量', questionCount)
+    
+    // 从题库中选题
+    const fullBank = require('../../data/questions-full.js')
+    const ageBank = fullBank[selectedDifficulty] || fullBank.age4
+    
+    // 如果没有选择题型，默认全选
+    const topics = selectedTopics.length > 0 ? selectedTopics : ['math', 'knowledge', 'english', 'color', 'logic', 'common']
+    
+    // 从每个题型中随机选题
+    topics.forEach(topic => {
+      const topicQuestions = ageBank[topic] || []
+      // 每个题型至少选 1 题
+      const count = Math.max(1, Math.floor(questionCount / topics.length))
+      
+      for (let i = 0; i < count && i < topicQuestions.length; i++) {
+        const q = topicQuestions[Math.floor(Math.random() * topicQuestions.length)]
+        allQuestions.push({
+          q: q.q,
+          a: q.a,
+          ans: q.ans,
+          type: topic,
+          difficulty: q.difficulty || 1
+        })
+      }
+    })
+    
+    // 如果题目不够，随机补充
+    while (allQuestions.length < questionCount) {
+      const randomTopic = topics[Math.floor(Math.random() * topics.length)]
+      const topicQuestions = ageBank[randomTopic] || []
+      if (topicQuestions.length > 0) {
+        const q = topicQuestions[Math.floor(Math.random() * topicQuestions.length)]
+        allQuestions.push({
+          q: q.q,
+          a: q.a,
+          ans: q.ans,
+          type: randomTopic
+        })
+      } else {
+        break
+      }
+    }
+    
+    // 截取指定数量
+    const questions = allQuestions.slice(0, questionCount)
+    
+    this.setData({ questions })
+    console.log('题目生成完成，共', questions.length, '题')
+  },
+
   // 显示题目
   showQuestion() {
-    console.log('显示题目')
     const { currentQuestionIndex, questions } = this.data
-    
-    console.log('当前索引', currentQuestionIndex)
-    console.log('题目数量', questions.length)
-    console.log('奥特曼血量', this.data.ultramanHealth)
-    console.log('怪兽血量', this.data.monsterHealth)
     
     if (currentQuestionIndex >= questions.length || 
         this.data.ultramanHealth <= 0 || 
         this.data.monsterHealth <= 0) {
-      console.log('游戏结束条件满足')
       this.endGame()
       return
     }
 
     const question = questions[currentQuestionIndex]
-    console.log('当前题目', question)
     
     this.setData({
       currentQuestion: question,
@@ -174,20 +303,15 @@ Page({
 
   // 选择答案
   selectAnswer(e) {
-    console.log('选择答案', e)
     if (!this.data.canAnswer) return
 
     const selectedIndex = e.currentTarget.dataset.index
     const { currentQuestion } = this.data
 
-    console.log('选择的答案索引', selectedIndex)
-    console.log('正确答案索引', currentQuestion.ans)
-
     this.setData({ canAnswer: false })
     this.vibrate()
 
     const isCorrect = selectedIndex === currentQuestion.ans
-    console.log('答案是否正确', isCorrect)
 
     if (isCorrect) {
       // 答对了
@@ -198,10 +322,8 @@ Page({
         monsterHealth: newMonsterHealth,
         correctCount: newCorrectCount,
         showAttack: true,
-        attackEmoji: '💥',
-        attackPosition: 'right'
+        attackEmoji: '💥'
       })
-      console.log('答对了！怪兽血量', newMonsterHealth)
     } else {
       // 答错了
       const newUltramanHealth = this.data.ultramanHealth - 1
@@ -209,8 +331,7 @@ Page({
       this.setData({
         ultramanHealth: newUltramanHealth,
         showAttack: true,
-        attackEmoji: '⚡',
-        attackPosition: 'left'
+        attackEmoji: '⚡'
       })
       
       // 记录错题
@@ -220,8 +341,6 @@ Page({
         correctAnswer: currentQuestion.a[currentQuestion.ans],
         type: currentQuestion.type
       })
-      
-      console.log('答错了！奥特曼血量', newUltramanHealth)
     }
 
     // 隐藏动画
@@ -242,15 +361,11 @@ Page({
 
   // 游戏结束
   endGame() {
-    console.log('游戏结束')
     const won = this.data.monsterHealth <= 0 && this.data.ultramanHealth > 0
     const totalQuestions = this.data.currentQuestionIndex
     const accuracy = totalQuestions > 0 
       ? Math.round((this.data.correctCount / totalQuestions) * 100) 
       : 0
-
-    console.log('是否胜利', won)
-    console.log('正确率', accuracy)
 
     this.setData({
       gameState: 'result',
@@ -260,8 +375,6 @@ Page({
     })
 
     this.vibrate()
-    
-    // 保存游戏记录
     this.saveGameRecord()
   },
 
@@ -274,17 +387,17 @@ Page({
         win: this.data.isWin,
         correctCount: this.data.correctCount,
         wrongCount: this.data.wrongCount,
-        accuracy: this.data.accuracy
+        accuracy: this.data.accuracy,
+        topics: this.data.selectedTopics,
+        difficulty: this.data.selectedDifficulty
       }
       records.unshift(newRecord)
       
-      // 只保留最近 20 条记录
       if (records.length > 20) {
         records.splice(20)
       }
       
       wx.setStorageSync('gameRecords', records)
-      console.log('游戏记录已保存')
     } catch (e) {
       console.error('保存记录失败', e)
     }
@@ -292,14 +405,28 @@ Page({
 
   // 再玩一次
   restartGame() {
-    console.log('重新开始游戏')
     this.setData({
       gameState: 'select',
       selectedUltraman: null,
-      selectedMonster: null
+      selectedMonster: null,
+      selectedTopics: []
+    })
+    this.vibrate()
+  },
+
+  // 再来一局（保持设置）
+  playAgain() {
+    this.setData({
+      gameState: 'battle',
+      ultramanHealth: 10,
+      monsterHealth: 10,
+      currentQuestionIndex: 0,
+      wrongQuestions: [],
+      correctCount: 0
     })
     this.initQuestions()
     this.vibrate()
+    this.showQuestion()
   },
 
   // 查看历史记录
@@ -309,14 +436,32 @@ Page({
     })
   },
 
+  // 去商店
+  goToShop() {
+    wx.navigateTo({
+      url: '/pages/shop/shop'
+    })
+  },
+
   // 震动反馈
   vibrate() {
     try {
       wx.vibrateShort({
         type: 'light'
       })
-    } catch (e) {
-      console.log('震动失败', e)
+    } catch (e) {}
+  },
+  
+  // 返回上一步
+  goBack() {
+    const { gameState } = this.data
+    
+    if (gameState === 'topic') {
+      this.setData({ gameState: 'select' })
+    } else if (gameState === 'difficulty') {
+      this.setData({ gameState: 'topic' })
     }
+    
+    this.vibrate()
   }
 })
