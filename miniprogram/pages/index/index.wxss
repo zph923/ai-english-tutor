@@ -1,0 +1,59 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 20rpx;
+}
+
+.header {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #4A90D9;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+.chat-area {
+  flex: 1;
+  background: #f5f5f5;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin: 20rpx 0;
+}
+
+.message {
+  background: #fff;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.input-area {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 10rpx;
+  padding: 20rpx;
+}
+
+.submit-btn {
+  background: #4A90D9;
+  color: #fff;
+  border: none;
+  padding: 20rpx 40rpx;
+  border-radius: 10rpx;
+}

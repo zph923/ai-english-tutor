@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="header">
+    <text class="title">🤖 AI 口语陪练</text>
+    <text class="subtitle">随时随地练习英语</text>
+  </view>
+
+  <view class="chat-area">
+    <view class="message" wx:for="{{chatHistory}}" wx:key="index">
+      <text>{{item.content}}</text>
+    </view>
+  </view>
+
+  <view class="input-area">
+    <input 
+      class="input" 
+      placeholder="输入你想练习的话题..." 
+      value="{{inputValue}}"
+      bindinput="onInput"
+    />
+    <button class="submit-btn" bindtap="onSubmit">发送</button>
+  </view>
+</view>

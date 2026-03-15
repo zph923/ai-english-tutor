@@ -1,0 +1,21 @@
+{
+  "name": "ai-english-tutor-server",
+  "version": "1.0.0",
+  "description": "AI English Tutor Backend Service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["ai", "english", "tutor", "wechat"],
+  "author": "zph923",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
